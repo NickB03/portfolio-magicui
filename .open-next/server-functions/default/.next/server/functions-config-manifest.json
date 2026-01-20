@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "functions": {
+    "/blog": {},
+    "/blog/[slug]/opengraph-image": {},
+    "/blog/opengraph-image": {},
+    "/opengraph-image": {},
+    "/use-cases/[slug]": {}
+  }
+}
