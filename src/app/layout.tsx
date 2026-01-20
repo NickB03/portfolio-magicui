@@ -65,14 +65,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased relative",
+          "min-h-screen bg-background font-sans antialiased max-w-[100vw] overflow-hidden",
           geist.variable,
           geistMono.variable
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="light">
           <TooltipProvider delayDuration={0}>
-            <div className="absolute inset-0 top-0 left-0 right-0 h-[100px] overflow-hidden z-0">
+            <div className="fixed inset-0 top-0 left-0 right-0 h-[100px] overflow-hidden z-0">
               <FlickeringGrid
                 className="h-full w-full"
                 squareSize={2}
@@ -83,10 +83,19 @@ export default function RootLayout({
                 }}
               />
             </div>
-            <div className="relative z-10 max-w-2xl mx-auto py-12 pb-24 sm:py-24 px-6">
-              {children}
-            </div>
             <Navbar />
+            <div
+              className="relative z-10 w-full h-screen overflow-y-auto overflow-x-hidden"
+              style={{
+                maskImage: "linear-gradient(to bottom, transparent, black 100px)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent, black 100px)",
+              }}
+            >
+              <div className="max-w-2xl mx-auto py-12 pb-24 sm:py-24 px-6">
+                {children}
+              </div>
+            </div>
           </TooltipProvider>
         </ThemeProvider>
       </body>
