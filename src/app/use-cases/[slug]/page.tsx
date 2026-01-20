@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 
 export default function UseCasePage({ params }: { params: { slug: string } }) {
     return (
