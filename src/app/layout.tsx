@@ -85,14 +85,14 @@ export default function RootLayout({
             </div>
             <Navbar />
             <div
-              className="relative z-10 w-full h-screen overflow-y-auto overflow-x-hidden"
+              className="relative z-10 w-full h-screen overflow-y-auto overflow-x-hidden scroll-smooth scroll-pt-28 md:scroll-pt-32"
               style={{
                 maskImage: "linear-gradient(to bottom, transparent, black 100px)",
                 WebkitMaskImage:
                   "linear-gradient(to bottom, transparent, black 100px)",
               }}
             >
-              <div className="max-w-2xl mx-auto py-12 pb-24 sm:py-24 px-6">
+              <div className="max-w-2xl mx-auto pt-24 pb-12 sm:pt-32 sm:pb-24 px-6">
                 {children}
               </div>
             </div>

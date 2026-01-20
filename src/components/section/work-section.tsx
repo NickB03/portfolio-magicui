@@ -24,7 +24,7 @@ function LogoImage({ src, alt }: { src: string; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="size-8 md:size-10 p-1 border rounded-full shadow ring-2 ring-border overflow-hidden object-contain flex-none"
+      className="size-8 md:size-10 border rounded-full shadow ring-2 ring-border overflow-hidden object-cover flex-none"
       onError={() => setImageError(true)}
     />
   );
@@ -33,10 +33,10 @@ function LogoImage({ src, alt }: { src: string; alt: string }) {
 export default function WorkSection() {
   return (
     <Accordion type="single" collapsible className="w-full grid gap-6">
-      {DATA.work.map((work) => (
+      {DATA.work.map((work, id) => (
         <AccordionItem
-          key={work.company}
-          value={work.company}
+          key={`${work.company}-${id}`}
+          value={`${work.company}-${id}`}
           className="w-full border-b-0 grid gap-2"
         >
           <AccordionTrigger className="hover:no-underline p-0 cursor-pointer transition-colors rounded-none group [&>svg]:hidden">
