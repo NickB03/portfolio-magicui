@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { paginate, normalizePage } from "@/lib/pagination";
 import { ChevronRight } from "lucide-react";
 
-export const runtime = 'edge';
+
 
 export const metadata: Metadata = {
   title: "Blog",
