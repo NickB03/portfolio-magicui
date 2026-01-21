@@ -54,6 +54,10 @@ export const metadata: Metadata = {
     google: "",
     yandex: "",
   },
+  icons: {
+    icon: "/nb-logo.png?v=1",
+    apple: "/nb-logo.png?v=1",
+  },
 };
 
 export default function RootLayout({
