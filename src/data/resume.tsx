@@ -21,7 +21,7 @@ export const DATA = {
   description:
     "",
   summary:
-    "Product leader with 16+ years in enterprise networking spanning sales, solutions architecture, and product management. Proven ability to translate complex technical concepts into compelling narratives for executive and technical audiences. Currently building full-stack AI applications hands-on, from vana.bot (AI chat platform with 630+ commits & CI/CD workflows) to enterprise platforms replacing legacy systems with modern, AI tools. This practical experience bridges product vision and technical implementation, enabling deeper collaboration with engineering teams and more informed decisions for AI-powered products. Self-driven learner who validates ideas through prototyping and iteration.",
+    "I'm a Product Leader passionate about learning through building. Over the past year, I’ve evolved from planning and supporting AI product initiatives to directly prototyping and deploying full-stack applications, from frontend UX to backend systems, using AI as a development partner. This hands-on experience has accelerated my ability to validate ideas rapidly, turning concepts into working software in days, not months.\n\nBy working closely with multi-agent frameworks like Google’s Agent Development Kit, I’ve gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.",
   avatarUrl: "/me.jpg",
   competencies: [],
   skills: [],
