@@ -21,7 +21,7 @@ export const DATA = {
   description:
     "",
   summary:
-    "I'm a Product Leader passionate about learning through building. Over the past year, I’ve evolved from planning and supporting AI product initiatives to directly prototyping and deploying full-stack applications, from frontend UX to backend systems, using AI as a development partner. This hands-on experience has accelerated my ability to validate ideas rapidly, turning concepts into working software in days, not months.\n\nBy working closely with multi-agent frameworks like Google’s Agent Development Kit, I’ve gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.",
+    "I approach product development as a hands-on builder. Over the past year, I've learned to design, build, and launch full-stack AI applications, taking ideas from prototype to production using modern development workflows and CI/CD pipelines.\n\nBy working closely with multi-agent frameworks like Google's Agent Development Kit, I've gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.",
   avatarUrl: "/me.jpg",
   competencies: [],
   skills: [],
