@@ -39,12 +39,12 @@ export default function Page() {
                 delay={BLUR_FADE_DELAY}
                 className="text-3xl font-semibold tracking-tighter sm:text-4xl lg:text-5xl"
                 yOffset={8}
-                text={`Hi, I'm ${DATA.name.split(" ")[0]}`}
+                text={DATA.name}
               />
               <BlurFadeText
                 className="text-muted-foreground md:text-lg lg:text-xl"
                 delay={BLUR_FADE_DELAY}
-                text={DATA.description}
+                text="Product Leader & AI Builder"
               />
               <BlurFadeText
                 className="text-muted-foreground md:text-lg lg:text-xl"
