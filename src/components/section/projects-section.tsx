@@ -31,12 +31,12 @@ export default function ProjectsSection() {
                         </p>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto auto-rows-fr">
+                <div className="flex flex-wrap gap-3 justify-center max-w-[800px] mx-auto">
                     {DATA.projects.map((project, id) => (
                         <BlurFade
                             key={project.title}
                             delay={BLUR_FADE_DELAY * 12 + id * 0.05}
-                            className="h-full"
+                            className="w-full sm:w-[calc(50%-6px)]"
                         >
                             <ProjectCard
                                 href={project.href}

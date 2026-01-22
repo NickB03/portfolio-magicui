@@ -73,7 +73,7 @@ export const DATA = {
       href: "https://att.com",
       badges: [],
       location: "Dallas, TX",
-      title: "Lead Product Management & Development (Edge Solutions – MNS)",
+      title: "Lead Product Management & Development (Edge Solutions)",
       logoUrl: "/globe.png",
       start: "August 2022",
       end: "August 2025",
@@ -133,6 +133,7 @@ export const DATA = {
       image: "/vana-preview.jpg",
       video: "",
     },
+    /*
     {
       title: "AnalystAI",
       href: "",
@@ -167,6 +168,7 @@ export const DATA = {
       image: "/chatpdf-cli.png",
       video: "",
     },
+    */
   ],
   useCases: [
     {
@@ -174,12 +176,13 @@ export const DATA = {
       href: "/use-cases/breezinet",
       dates: "",
       active: true,
-      description: "",
+      description: "Prototyped and pitched a unified fiber & wireless offering in a two-day workshop, securing executive buy-in for development.",
       technologies: [],
       links: [],
       image: "/breezi-preview.jpg",
       video: "",
     },
+    /*
     {
       title: "MNS Order Automation",
       href: "/use-cases/mns-order-automation",
@@ -202,6 +205,7 @@ export const DATA = {
       image: "/bva-preview.jpg",
       video: "",
     },
+    */
   ],
   hackathons: [],
 } as const;
