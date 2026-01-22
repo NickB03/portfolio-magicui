@@ -21,7 +21,7 @@ export const DATA = {
   description:
     "",
   summary:
-    "I approach product development as a hands-on builder. Over the past year, I've learned to design, build, and launch full-stack AI applications, taking ideas from prototype to production using modern development workflows and CI/CD pipelines.\n\nBy working closely with multi-agent frameworks like Google's Agent Development Kit, I've gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.",
+    "I am a product leader and hands-on builder who bridges the gap between enterprise strategy and execution with a focus on building industry leading managed SD-WAN & SASE solutions.\n\nOver the past year, I've learned to design, build, and launch full-stack AI applications, taking ideas from prototype to production using modern development workflows and CI/CD pipelines.\n\nBy working closely with multi-agent frameworks like Google's Agent Development Kit, I've gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.",
   avatarUrl: "/me.jpg",
   competencies: [],
   skills: [],

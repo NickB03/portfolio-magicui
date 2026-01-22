@@ -77,7 +77,7 @@ export default function BreeziNetPage() {
                 {/* Context Section */}
                 <section className="space-y-4">
                     <div className="space-y-2">
-                        <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">02 — Context</span>
+                        <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">02 — Business Problem</span>
 
                     </div>
 
@@ -130,7 +130,7 @@ export default function BreeziNetPage() {
                 {/* Design & Research Section */}
                 <section className="space-y-4">
                     <div className="space-y-2">
-                        <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">04 — Foundations</span>
+                        <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">04 — Research & Design</span>
 
                     </div>
 
