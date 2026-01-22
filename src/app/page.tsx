@@ -46,11 +46,7 @@ export default function Page() {
                 delay={BLUR_FADE_DELAY}
                 text="Product Leader & AI Builder"
               />
-              <BlurFadeText
-                className="text-muted-foreground md:text-lg lg:text-xl"
-                delay={BLUR_FADE_DELAY}
-                text="Building full-stack AI applications hands-on."
-              />
+
             </div>
             <BlurFade delay={BLUR_FADE_DELAY} className="order-1 md:order-2">
               <Avatar className="size-24 md:size-32 border rounded-full shadow-lg ring-4 ring-muted">
