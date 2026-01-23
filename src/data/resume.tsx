@@ -66,7 +66,7 @@ export const DATA = {
       start: "August 2025",
       end: "Current",
       description:
-        "$400M Product Portfolio Leadership: Responsible for AT&T Global Solution Center, Network Function Virtualization, and Product Showcase teams. Partner closely with VP+ leadership to drive strategic portfolio decisions and align product roadmaps with business objectives.\n\nAI Platform Development: Led end-to-end product development replacing a critical legacy system nearing collapse. Developed solution, secured funding, directed development team, and delivered a solution (Next.js, React, TypeScript, Python, PostgreSQL) that streamlined complex workflows, reduced cycle time, and significantly improved seller experience.\n\nLLM & AI Workflow Innovation: Initiated and secured approval to develop LLM-powered workflow integrations using LangSmith, driving AI adoption across Value Added Solutions to enhance operational efficiency and user experience.\n\nAI Product Strategy & Innovation: Selected for AT&T Growth Council through innovation submission for Network Fabric Project, an AI-focused product evolution initiative for AT&T Business network and products.",
+        "• Led major product portfolio including Global Solution Center and Network Function Virtualization, partnering with executives to align roadmaps with business strategy.\n• Directed end-to-end development of a modern AI-powered platform (Next.js, React, Python) throughout the full lifecycle, significantly improving seller experience.\n• Spearheaded LLM workflow integrations using LangSmith to drive AI adoption and operational efficiency.\n• Selected for Growth Council to lead AI-focused product evolution initiatives for business networks.",
     },
     {
       company: "AT&T",
@@ -78,7 +78,7 @@ export const DATA = {
       start: "August 2022",
       end: "August 2025",
       description:
-        "AT&T Network Integrated SD-WAN: Took network-integrated SD-WAN solution from concept to market launch. Defined the product vision, managed $10M budget, and coordinated cross-functional teams across engineering, operations, and field sales. Deployed 16,000 devices generating $144M revenue over three years.\n\nGo-To-Market (GTM) Strategy & Product Positioning: Collaborated with stakeholders and vendors to develop GTM strategies and position AT&T’s Edge solutions effectively within the market. Created customer-facing collateral and ensured consistent, targeted messaging to align with customer needs and AT&T’s strategic vision.\n\nProduct Messaging & Differentiation: Worked across functional groups to develop differentiators for AT&T’s Edge Solutions that communicated value to both business and technical audiences. Served as a key speaker at AT&T Executive Briefing Center and TechForum events.\n\nIndustry Recognition: Engaged with industry analysts to secure AT&T’s position as the #1 Managed SD-WAN provider, recognized by Frost & Sullivan, Vertical Systems Group, and others.",
+        "• Took network-integrated SD-WAN solution from concept to market launch, managing significant budget and cross-functional teams to deploy an extensive device fleet.\n• Developed comprehensive GTM strategies and customer-facing collateral to position Edge solutions effectively and ensure consistent messaging.\n• Secured \"Market Leader\" recognition from top industry analysts (Frost & Sullivan, Vertical Systems Group) through strategic engagement and product differentiation.",
     },
     {
       company: "AT&T",
@@ -90,7 +90,7 @@ export const DATA = {
       start: "August 2020",
       end: "July 2022",
       description:
-        "Global Enterprise Solutions: Designed network and security solutions for global enterprise clients by understanding their unique requirements and translating them into tailored offerings. Drove 15% increase in SD-WAN, SASE, and security product adoption through consultative engagements.\n\nExecutive Relationship Management: Built executive-level relationships with key clients, generating over $150M in annual revenue. Served as trusted advisor on network transformations, gathering insights that informed product positioning and roadmap priorities.\n\nCross-Functional Sales Collaboration: Partnered with engineering, marketing, and sales teams to ensure solutions met customer needs and aligned with AT&T’s strategic vision.",
+        "• Designed tailored network and security solutions (SD-WAN, SASE) for global enterprise clients, driving significant product adoption.\n• Managed executive-level relationships generating substantial annual revenue, serving as a trusted advisor on network transformation.\n• Orchestrated collaboration between engineering, marketing, and sales to ensure solutions aligned with strategic vision.",
     },
     {
       company: "AT&T",
@@ -102,7 +102,7 @@ export const DATA = {
       start: "January 2019",
       end: "July 2020",
       description:
-        "Edge Specialist Team Launch: Played a key role in launching the Edge Specialist team, driving a 25% increase in service adoption by positioning SD-WAN and network security solutions to align with enterprise client needs and differentiate AT&T’s offerings.\n\nSD-WAN Workshops & Revenue Generation: Led over 20 SD-WAN workshops, generating $8M in new revenue by translating complex technical concepts for executive and non-technical stakeholders.\n\nTechnical Sales Training: Developed and delivered targeted technical training for sales teams, partnering with engineering to enhance understanding of SD-WAN and Managed Network Services.",
+        "• Key driver in launching the Edge Specialist team, increasing service adoption by effectively positioning SD-WAN and security solutions.\n• Led 20+ SD-WAN workshops translating technical concepts for stakeholders, directly generating significant new revenue.\n• Created and delivered specialized technical training for sales teams to enhance expertise in Managed Network Services.",
     },
   ],
   education: [],
@@ -132,6 +132,7 @@ export const DATA = {
       ],
       image: "/vana-preview.jpg",
       video: "",
+      imageClassName: "h-auto w-full object-cover",
     },
     /*
     {
@@ -179,8 +180,9 @@ export const DATA = {
       description: "Prototyped and pitched a unified fiber & wireless offering in a two-day workshop, securing executive buy-in for development.",
       technologies: [],
       links: [],
-      image: "/breezi-preview.jpg",
+      image: "/breezinet-new.png",
       video: "",
+      imageClassName: "h-auto w-full object-cover",
     },
     /*
     {

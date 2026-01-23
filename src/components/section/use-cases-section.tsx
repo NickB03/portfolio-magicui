@@ -46,6 +46,7 @@ export default function UseCasesSection() {
                                 image={project.image}
                                 video={project.video}
                                 links={project.links}
+                                imageClassName={project.imageClassName}
                             />
                         </BlurFade>
                     ))}

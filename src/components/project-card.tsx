@@ -8,18 +8,18 @@ import Link from "next/link";
 import { useState } from "react";
 import Markdown from "react-markdown";
 
-function ProjectImage({ src, alt }: { src: string; alt: string }) {
+function ProjectImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [imageError, setImageError] = useState(false);
 
   if (!src || imageError) {
-    return <div className="w-full h-48 bg-muted" />;
+    return <div className={cn("w-full h-48 bg-muted", className)} />;
   }
 
   return (
     <img
       src={src}
       alt={alt}
-      className="w-full h-48 object-cover"
+      className={cn("w-full h-48 object-cover", className)}
       onError={() => setImageError(true)}
     />
   );
@@ -40,6 +40,7 @@ interface Props {
     href: string;
   }[];
   className?: string;
+  imageClassName?: string;
 }
 
 export function ProjectCard({
@@ -53,11 +54,12 @@ export function ProjectCard({
   video,
   links,
   className,
+  imageClassName,
 }: Props) {
   return (
     <div
       className={cn(
-        "flex flex-col h-full border border-border rounded-xl overflow-hidden transition-all duration-200",
+        "flex flex-col h-full border border-border rounded-xl overflow-hidden transition-all duration-200 bg-card text-card-foreground",
         href && "hover:ring-2 cursor-pointer hover:ring-muted",
         className
       )}
@@ -66,8 +68,8 @@ export function ProjectCard({
         {href ? (
           <Link
             href={href}
-            target="_blank"
-            rel="noopener noreferrer"
+            target={href.startsWith("http") ? "_blank" : undefined}
+            rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
             className="block"
           >
             {video ? (
@@ -77,12 +79,12 @@ export function ProjectCard({
                 loop
                 muted
                 playsInline
-                className="w-full h-48 object-cover"
+                className={cn("w-full h-48 object-cover", imageClassName)}
               />
             ) : image ? (
-              <ProjectImage src={image} alt={title} />
+              <ProjectImage src={image} alt={title} className={imageClassName} />
             ) : (
-              <div className="w-full h-48 bg-muted" />
+              <div className={cn("w-full h-48 bg-muted", imageClassName)} />
             )}
           </Link>
         ) : (
@@ -94,12 +96,12 @@ export function ProjectCard({
                 loop
                 muted
                 playsInline
-                className="w-full h-48 object-cover"
+                className={cn("w-full h-48 object-cover", imageClassName)}
               />
             ) : image ? (
-              <ProjectImage src={image} alt={title} />
+              <ProjectImage src={image} alt={title} className={imageClassName} />
             ) : (
-              <div className="w-full h-48 bg-muted" />
+              <div className={cn("w-full h-48 bg-muted", imageClassName)} />
             )}
           </div>
         )}
@@ -134,8 +136,8 @@ export function ProjectCard({
           {href && (
             <Link
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
               className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
               aria-label={`Open ${title}`}
             >
