@@ -15,7 +15,7 @@ import { Csharp } from "@/components/ui/svgs/csharp";
 export const DATA = {
   name: "Nick Bohmer",
   initials: "NB",
-  url: "https://www.linkedin.com/in/nickbohmer",
+  url: "https://vana.bot",
   location: "Dallas, TX",
   locationLink: "https://www.google.com/maps/place/Dallas,+TX",
   description:
