@@ -7,23 +7,23 @@ import { cn } from "@/lib/utils";
 export type OrbPhase = "idle" | "thinking";
 
 interface VoicePoweredOrbProps {
-    className?: string;
-    hue?: number;
-    phase?: OrbPhase;
-    hoverIntensity?: number;
-    rotateSpeed?: number;
+  className?: string;
+  hue?: number;
+  phase?: OrbPhase;
+  hoverIntensity?: number;
+  rotateSpeed?: number;
 }
 
 export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
-    className,
-    hue = 0,
-    phase = "idle",
-    hoverIntensity = 0.5,
-    rotateSpeed = 0.3,
+  className,
+  hue = 0,
+  phase = "idle",
+  hoverIntensity = 0.5,
+  rotateSpeed = 0.3,
 }) => {
-    const ctnDom = useRef<HTMLDivElement>(null);
+  const ctnDom = useRef<HTMLDivElement>(null);
 
-    const vert = /* glsl */ `
+  const vert = /* glsl */ `
     precision highp float;
     attribute vec2 position;
     attribute vec2 uv;
@@ -34,7 +34,7 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
     }
   `;
 
-    const frag = /* glsl */ `
+  const frag = /* glsl */ `
     precision highp float;
 
     uniform float iTime;
@@ -184,142 +184,142 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
     }
   `;
 
-    useEffect(() => {
-        const container = ctnDom.current;
-        if (!container) return;
+  useEffect(() => {
+    const container = ctnDom.current;
+    if (!container) return;
 
-        let rendererInstance: Renderer | null = null;
-        let glContext: WebGLRenderingContext | WebGL2RenderingContext | null = null;
-        let rafId: number;
-        let program: Program | null = null;
+    let rendererInstance: Renderer | null = null;
+    let glContext: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+    let rafId: number;
+    let program: Program | null = null;
 
-        try {
-            rendererInstance = new Renderer({
-                alpha: true,
-                premultipliedAlpha: false,
-                antialias: true,
-                dpr: window.devicePixelRatio || 1
-            });
-            glContext = rendererInstance.gl;
-            glContext.clearColor(0, 0, 0, 0);
-            glContext.enable(glContext.BLEND);
-            glContext.blendFunc(glContext.SRC_ALPHA, glContext.ONE_MINUS_SRC_ALPHA);
+    try {
+      rendererInstance = new Renderer({
+        alpha: true,
+        premultipliedAlpha: false,
+        antialias: true,
+        dpr: window.devicePixelRatio || 1
+      });
+      glContext = rendererInstance.gl;
+      glContext.clearColor(0, 0, 0, 0);
+      glContext.enable(glContext.BLEND);
+      glContext.blendFunc(glContext.SRC_ALPHA, glContext.ONE_MINUS_SRC_ALPHA);
 
-            while (container.firstChild) {
-                container.removeChild(container.firstChild);
-            }
-            container.appendChild(glContext.canvas);
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      container.appendChild(glContext.canvas as unknown as Node);
 
-            const geometry = new Triangle(glContext);
-            program = new Program(glContext, {
-                vertex: vert,
-                fragment: frag,
-                uniforms: {
-                    iTime: { value: 0 },
-                    iResolution: {
-                        value: new Vec3(
-                            glContext.canvas.width,
-                            glContext.canvas.height,
-                            glContext.canvas.width / glContext.canvas.height
-                        ),
-                    },
-                    hue: { value: hue },
-                    hover: { value: 0 },
-                    rot: { value: 0 },
-                    hoverIntensity: { value: hoverIntensity },
-                },
-            });
+      const geometry = new Triangle(glContext as any);
+      program = new Program(glContext as any, {
+        vertex: vert,
+        fragment: frag,
+        uniforms: {
+          iTime: { value: 0 },
+          iResolution: {
+            value: new Vec3(
+              glContext.canvas.width,
+              glContext.canvas.height,
+              glContext.canvas.width / glContext.canvas.height
+            ),
+          },
+          hue: { value: hue },
+          hover: { value: 0 },
+          rot: { value: 0 },
+          hoverIntensity: { value: hoverIntensity },
+        },
+      });
 
-            const mesh = new Mesh(glContext, { geometry, program });
+      const mesh = new Mesh(glContext as any, { geometry, program });
 
-            const resize = () => {
-                if (!container || !rendererInstance || !glContext) return;
-                const width = container.clientWidth;
-                const height = container.clientHeight;
+      const resize = () => {
+        if (!container || !rendererInstance || !glContext) return;
+        const width = container.clientWidth;
+        const height = container.clientHeight;
 
-                if (width === 0 || height === 0) return;
+        if (width === 0 || height === 0) return;
 
-                rendererInstance.setSize(width, height);
+        rendererInstance.setSize(width, height);
 
-                if (program) {
-                    program.uniforms.iResolution.value.set(
-                        width,
-                        height,
-                        width / height
-                    );
-                }
-            };
-
-            // Use ResizeObserver for better responsiveness than window 'resize'
-            const resizeObserver = new ResizeObserver(() => resize());
-            resizeObserver.observe(container);
-            resize();
-
-            let lastTime = 0;
-            let currentRot = 0;
-            let simulatedActivity = 0;
-
-            const update = (t: number) => {
-                rafId = requestAnimationFrame(update);
-                if (!program) return;
-
-                const dt = (t - lastTime) * 0.001;
-                lastTime = t;
-                program.uniforms.iTime.value = t * 0.001;
-                program.uniforms.hue.value = hue;
-
-                // Simulate activity based on phase
-                const targetActivity = phase === "thinking" ? 1.0 : 0.0;
-                // Smooth transition
-                simulatedActivity += (targetActivity - simulatedActivity) * 0.05;
-
-                // Rotation speed increases with activity
-                const currentSpeed = rotateSpeed + (simulatedActivity * 1.5);
-                currentRot += dt * currentSpeed;
-
-                // Hover/Warp intensity increases with activity
-                program.uniforms.hover.value = simulatedActivity;
-                program.uniforms.hoverIntensity.value = hoverIntensity;
-                program.uniforms.rot.value = currentRot;
-
-                if (rendererInstance && glContext) {
-                    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-                    rendererInstance.render({ scene: mesh });
-                }
-            };
-
-            rafId = requestAnimationFrame(update);
-
-            return () => {
-                cancelAnimationFrame(rafId);
-                resizeObserver.disconnect();
-
-                if (container && glContext && glContext.canvas) {
-                    try {
-                        if (container.contains(glContext.canvas)) {
-                            container.removeChild(glContext.canvas);
-                        }
-                    } catch (error) {
-                        console.warn("Canvas cleanup error:", error);
-                    }
-                }
-
-                if (glContext) {
-                    const ext = glContext.getExtension("WEBGL_lose_context");
-                    if (ext) ext.loseContext();
-                }
-            };
-
-        } catch (error) {
-            console.error("Error initializing Voice Powered Orb:", error);
-            return () => { };
+        if (program) {
+          program.uniforms.iResolution.value.set(
+            width,
+            height,
+            width / height
+          );
         }
-    }, [hue, phase, hoverIntensity, rotateSpeed, vert, frag]);
+      };
 
-    return (
-        <div
-            ref={ctnDom}
-            className={cn("w-full h-full relative", className)}
-        />
-    );
+      // Use ResizeObserver for better responsiveness than window 'resize'
+      const resizeObserver = new ResizeObserver(() => resize());
+      resizeObserver.observe(container);
+      resize();
+
+      let lastTime = 0;
+      let currentRot = 0;
+      let simulatedActivity = 0;
+
+      const update = (t: number) => {
+        rafId = requestAnimationFrame(update);
+        if (!program) return;
+
+        const dt = (t - lastTime) * 0.001;
+        lastTime = t;
+        program.uniforms.iTime.value = t * 0.001;
+        program.uniforms.hue.value = hue;
+
+        // Simulate activity based on phase
+        const targetActivity = phase === "thinking" ? 1.0 : 0.0;
+        // Smooth transition
+        simulatedActivity += (targetActivity - simulatedActivity) * 0.05;
+
+        // Rotation speed increases with activity
+        const currentSpeed = rotateSpeed + (simulatedActivity * 1.5);
+        currentRot += dt * currentSpeed;
+
+        // Hover/Warp intensity increases with activity
+        program.uniforms.hover.value = simulatedActivity;
+        program.uniforms.hoverIntensity.value = hoverIntensity;
+        program.uniforms.rot.value = currentRot;
+
+        if (rendererInstance && glContext) {
+          glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+          rendererInstance.render({ scene: mesh });
+        }
+      };
+
+      rafId = requestAnimationFrame(update);
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        resizeObserver.disconnect();
+
+        if (container && glContext && glContext.canvas) {
+          try {
+            if (container.contains(glContext.canvas as unknown as Node)) {
+              container.removeChild(glContext.canvas as unknown as Node);
+            }
+          } catch (error) {
+            console.warn("Canvas cleanup error:", error);
+          }
+        }
+
+        if (glContext) {
+          const ext = glContext.getExtension("WEBGL_lose_context");
+          if (ext) ext.loseContext();
+        }
+      };
+
+    } catch (error) {
+      console.error("Error initializing Voice Powered Orb:", error);
+      return () => { };
+    }
+  }, [hue, phase, hoverIntensity, rotateSpeed, vert, frag]);
+
+  return (
+    <div
+      ref={ctnDom}
+      className={cn("w-full h-full relative", className)}
+    />
+  );
 };
