@@ -36,7 +36,7 @@ export const DATA = {
     social: {
       GitHub: {
         name: "GitHub",
-        url: "https://github.com/nickbohmer",
+        url: "https://github.com/NickB03/vana",
         icon: Icons.github,
         navbar: true,
       },
@@ -123,13 +123,7 @@ export const DATA = {
         "PostgreSQL",
         "Deno",
       ],
-      links: [
-        {
-          type: "Source",
-          href: "https://github.com/nickbohmer/vana",
-          icon: <Icons.github className="size-3" />,
-        },
-      ],
+      links: [],
       image: "/vana-preview.jpg",
       video: "",
       imageClassName: "h-auto w-full object-cover",
