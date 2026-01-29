@@ -11,26 +11,29 @@ interface SiriOrbProps {
 
 export function SiriOrb({ className, size = "md", phase = "idle" }: SiriOrbProps) {
     const sizeClasses = {
-        sm: "h-12 w-12", // Slightly larger to account for canvas padding/glow
-        md: "h-20 w-20",
-        lg: "h-32 w-32",
+        sm: "h-7 w-7", // Compact size for button integration
+        md: "h-10 w-10", // Header size with better proportions
+        lg: "h-24 w-24",
     };
 
     return (
-        <div className={cn("relative flex items-center justify-center pointer-events-none", sizeClasses[size], className)}>
-            <div className="absolute inset-0">
+        <div className={cn(
+            "relative flex items-center justify-center pointer-events-none shrink-0",
+            sizeClasses[size],
+            className
+        )}>
+            <div className={cn(
+                "w-full h-full animate-pulse-glow",
+                size === "sm" && "drop-shadow-[0_0_2px_rgba(139,92,246,0.3)] dark:drop-shadow-[0_0_2px_rgba(159,112,255,0.4)]",
+                size === "md" && "drop-shadow-[0_0_4px_rgba(139,92,246,0.35)] dark:drop-shadow-[0_0_4px_rgba(159,112,255,0.45)]",
+                size === "lg" && "drop-shadow-[0_0_8px_rgba(139,92,246,0.4)] dark:drop-shadow-[0_0_8px_rgba(159,112,255,0.5)]",
+            )}>
                 <VoicePoweredOrb
                     phase={phase}
-                    hoverIntensity={0.6}
+                    hoverIntensity={0.3}
                     rotateSpeed={0.2}
                 />
             </div>
-
-            {/* Optional: Add a CSS glow if the WebGL one isn't strong enough in the UI context 
-                But the shader describes a light emission, so let's verify visual first. 
-                Keeping a subtle rounded glow for integration.
-            */}
-            <div className="absolute inset-0 bg-transparent shadow-[0_0_15px_rgba(255,255,255,0.05)] rounded-full pointer-events-none" />
         </div>
     );
 }

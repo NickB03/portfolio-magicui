@@ -43,6 +43,7 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
     uniform float hover;
     uniform float rot;
     uniform float hoverIntensity;
+    uniform float pulse;
     varying vec2 vUv;
 
     vec3 rgb2yiq(vec3 c) {
@@ -112,12 +113,12 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    // Colors matching the "Siri/MagicUI" aesthetic
-    const vec3 baseColor1 = vec3(0.611765, 0.262745, 0.996078); // Purple
-    const vec3 baseColor2 = vec3(0.298039, 0.760784, 0.913725); // Cyan
-    const vec3 baseColor3 = vec3(0.062745, 0.078431, 0.600000); // Deep Blue
-    const float innerRadius = 0.6;
-    const float noiseScale = 0.65;
+    // Colors matching the "Siri/MagicUI" aesthetic - enhanced vibrancy
+    const vec3 baseColor1 = vec3(0.7, 0.3, 1.0); // Brighter Purple
+    const vec3 baseColor2 = vec3(0.35, 0.8, 0.95); // Vibrant Cyan
+    const vec3 baseColor3 = vec3(0.1, 0.15, 0.75); // Richer Blue
+    const float innerRadius = 0.0; // Fully solid filled orb from center
+    const float noiseScale = 0.85; // Balanced movement
 
     float light1(float intensity, float attenuation, float dist) {
       return intensity / (1.0 + dist * attenuation);
@@ -136,12 +137,13 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       float len = length(uv);
       float invLen = len > 0.0 ? 1.0 / len : 0.0;
 
-      float n0 = snoise3(vec3(uv * noiseScale, iTime * 0.5)) * 0.5 + 0.5;
+      // Smooth noise animation - gentle and flowing
+      float n0 = snoise3(vec3(uv * noiseScale, iTime * 0.4)) * 0.5 + 0.5;
       float r0 = mix(mix(innerRadius, 1.0, 0.4), mix(innerRadius, 1.0, 0.6), n0);
       float d0 = distance(uv, (r0 * invLen) * uv);
-      float v0 = light1(1.0, 10.0, d0);
-      v0 *= smoothstep(r0 * 1.05, r0, len);
-      float cl = cos(ang + iTime * 2.0) * 0.5 + 0.5;
+      float v0 = light1(1.3, 9.0, d0); // Moderate intensity increase
+      v0 *= smoothstep(r0 * 1.08, r0, len); // Soft edge
+      float cl = cos(ang + iTime * 2.0) * 0.5 + 0.5; // Smooth gradient rotation
 
       float a = iTime * -1.0;
       vec2 pos = vec2(cos(a), sin(a)) * r0;
@@ -165,16 +167,29 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       float size = min(iResolution.x, iResolution.y);
       vec2 uv = (fragCoord - center) / size * 2.0;
 
+      // Apply subtle pulsing scale effect
+      float pulseScale = 1.0 + pulse * 0.04;
+      uv = uv / pulseScale;
+
       float angle = rot;
       float s = sin(angle);
       float c = cos(angle);
       uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
 
-      // Warping effect based on 'hover' (which we map to phase)
-      uv.x += hover * hoverIntensity * 0.1 * sin(uv.y * 10.0 + iTime);
-      uv.y += hover * hoverIntensity * 0.1 * sin(uv.x * 10.0 + iTime);
+      // Extremely minimal warping - only active during thinking
+      uv.x += hover * hoverIntensity * 0.02 * sin(uv.y * 6.0 + iTime * 0.5);
+      uv.y += hover * hoverIntensity * 0.02 * sin(uv.x * 6.0 + iTime * 0.5);
+      // Barely perceptible background movement
+      uv.x += 0.003 * sin(uv.y * 3.0 - iTime * 0.4);
+      uv.y += 0.003 * cos(uv.x * 3.0 - iTime * 0.4);
 
-      return draw(uv);
+      vec4 col = draw(uv);
+
+      // Add subtle brightness pulse
+      float brightnessPulse = 1.0 + pulse * 0.08;
+      col.rgb *= brightnessPulse;
+
+      return col;
     }
 
     void main() {
@@ -198,7 +213,7 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
         alpha: true,
         premultipliedAlpha: false,
         antialias: true,
-        dpr: window.devicePixelRatio || 1
+        dpr: Math.min(window.devicePixelRatio || 1, 2)
       });
       glContext = rendererInstance.gl;
       glContext.clearColor(0, 0, 0, 0);
@@ -227,6 +242,7 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
           hover: { value: 0 },
           rot: { value: 0 },
           hoverIntensity: { value: hoverIntensity },
+          pulse: { value: 0 },
         },
       });
 
@@ -269,18 +285,24 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
         program.uniforms.hue.value = hue;
 
         // Simulate activity based on phase
-        const targetActivity = phase === "thinking" ? 1.0 : 0.0;
-        // Smooth transition
+        const targetActivity = phase === "thinking" ? 1.0 : 0.05; // Idle is very still
+        // Smooth transition between states
         simulatedActivity += (targetActivity - simulatedActivity) * 0.05;
 
-        // Rotation speed increases with activity
+        // Rotation speed increases noticeably with activity
         const currentSpeed = rotateSpeed + (simulatedActivity * 1.5);
         currentRot += dt * currentSpeed;
 
-        // Hover/Warp intensity increases with activity
+        // Pulsing effect - much slower idle, faster when thinking
+        const pulseSpeed = 1.0 + (simulatedActivity * 2.5);
+        const pulseValue = Math.sin(t * 0.001 * pulseSpeed) * 0.5 + 0.5;
+
+        // Hover/Warp only active during thinking
         program.uniforms.hover.value = simulatedActivity;
-        program.uniforms.hoverIntensity.value = hoverIntensity;
+        program.uniforms.hoverIntensity.value = hoverIntensity * (0.5 + simulatedActivity * 0.5);
         program.uniforms.rot.value = currentRot;
+        // Pulse is more pronounced when thinking
+        program.uniforms.pulse.value = pulseValue * (0.2 + simulatedActivity * 0.8);
 
         if (rendererInstance && glContext) {
           glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);

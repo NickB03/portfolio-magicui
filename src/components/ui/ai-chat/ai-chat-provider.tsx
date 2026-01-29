@@ -30,7 +30,17 @@ const AIChatContext = createContext<AIChatContextType | null>(null);
 export function useAIChat() {
     const context = useContext(AIChatContext);
     if (!context) {
-        throw new Error("useAIChat must be used within an AIChatProvider");
+        // Return no-op functions when not in provider (e.g., when AI chat is disabled)
+        return {
+            isOpen: false,
+            open: () => {},
+            close: () => {},
+            toggle: () => {},
+            messages: [],
+            isLoading: false,
+            sendMessage: async () => {},
+            clearMessages: () => {},
+        };
     }
     return context;
 }
@@ -77,6 +87,42 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             });
 
             if (!response.ok) {
+                // Try to parse error response
+                const contentType = response.headers.get("content-type");
+                if (contentType?.includes("application/json")) {
+                    const errorData = await response.json();
+
+                    // Handle specific error types
+                    if (response.status === 503 && errorData.error === "API quota temporarily exceeded") {
+                        setMessages((prev) =>
+                            prev.map((msg) =>
+                                msg.id === assistantId
+                                    ? {
+                                        ...msg,
+                                        content: errorData.message || "The AI assistant is temporarily unavailable due to high usage. Please try again in a few minutes."
+                                    }
+                                    : msg
+                            )
+                        );
+                        return;
+                    }
+
+                    // Handle other structured errors
+                    if (errorData.message) {
+                        setMessages((prev) =>
+                            prev.map((msg) =>
+                                msg.id === assistantId
+                                    ? {
+                                        ...msg,
+                                        content: errorData.message
+                                    }
+                                    : msg
+                            )
+                        );
+                        return;
+                    }
+                }
+
                 throw new Error("Failed to get response");
             }
 

@@ -2,7 +2,6 @@
 
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import BlurFade from "@/components/magicui/blur-fade";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -12,9 +11,13 @@ import {
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useAIChat } from "@/components/ui/ai-chat/ai-chat-provider";
+import { SiriOrb } from "@/components/ui/ai-chat/siri-orb";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
+  const { open: openAIChat } = useAIChat();
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -118,24 +121,48 @@ export default function Navbar() {
                 </Tooltip>
               );
             })}
-          <Separator
-            orientation="vertical"
-            className="h-2/3 m-auto w-px bg-border"
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors">
-                <ModeToggle className="size-full cursor-pointer" />
-              </DockIcon>
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              sideOffset={8}
-              className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
-            >
-              <p>Theme</p>
-            </TooltipContent>
-          </Tooltip>
+          {process.env.NEXT_PUBLIC_ENABLE_AI_CHAT === "true" && (
+            <>
+              <Separator
+                orientation="vertical"
+                className="h-2/3 m-auto w-px bg-border"
+              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors">
+                    <ModeToggle className="size-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl" />
+                  </DockIcon>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  sideOffset={8}
+                  className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
+                >
+                  <p>Toggle Theme</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={openAIChat}
+                    type="button"
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl"
+                  >
+                    <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors flex items-center justify-center">
+                      <SiriOrb size="sm" />
+                    </DockIcon>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  sideOffset={8}
+                  className="rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
+                >
+                  <p>Ask AI</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
         </Dock>
       </BlurFade>
     </div>

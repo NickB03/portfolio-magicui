@@ -9,7 +9,6 @@ import "./globals.css";
 import { FlickeringGrid } from "@/components/magicui/flickering-grid";
 import {
   AIChatProvider,
-  AIChatButton,
   AIChatPopup,
 } from "@/components/ui/ai-chat";
 
@@ -110,7 +109,6 @@ export default function RootLayout({
                     {children}
                   </div>
                 </div>
-                <AIChatButton />
                 <AIChatPopup />
               </AIChatProvider>
             ) : (

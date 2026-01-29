@@ -1,13 +1,19 @@
 /**
  * Seed Knowledge Base Script
- * 
- * This script extracts content from resume data, chunks it,
- * generates embeddings via Gemini, and stores in Supabase pgvector.
- * 
+ *
+ * This script extracts content from resume data AND personal knowledge,
+ * chunks it, generates embeddings via Gemini, and stores in Supabase pgvector.
+ *
  * Usage: npx tsx scripts/seed-knowledge.ts
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync } from "fs";
+import { join } from "path";
+import { config } from "dotenv";
+
+// Load environment variables from .env.local
+config({ path: ".env.local" });
 
 // Resume data - imported as raw content since we're in a script
 const RESUME_DATA = {
@@ -82,11 +88,99 @@ interface KnowledgeChunk {
     content: string;
     metadata: {
         source: string;
-        type: "summary" | "work" | "project" | "use_case" | "contact";
+        type:
+            | "summary"
+            | "work"
+            | "project"
+            | "use_case"
+            | "contact"
+            | "personal"
+            | "family"
+            | "hobbies"
+            | "values"
+            | "preferences";
         title?: string;
         company?: string;
         period?: string;
+        section?: string;
     };
+}
+
+function parsePersonalKnowledge(): KnowledgeChunk[] {
+    const chunks: KnowledgeChunk[] = [];
+
+    try {
+        // Read the personal knowledge file
+        const filePath = join(process.cwd(), "nick-info.md");
+        const content = readFileSync(filePath, "utf-8");
+
+        // Split by major sections (## headers)
+        const sections = content.split(/^## /m).filter((s) => s.trim());
+
+        for (const section of sections) {
+            const lines = section.split("\n");
+            const sectionTitle = lines[0].trim();
+
+            // Skip the header/intro section
+            if (sectionTitle.startsWith("Nick Bohmer") || sectionTitle.includes("---")) {
+                continue;
+            }
+
+            // Get the full section content (remove the title line)
+            const sectionContent = lines.slice(1).join("\n").trim();
+
+            if (!sectionContent) continue;
+
+            // Determine the type based on section title
+            let type:
+                | "personal"
+                | "family"
+                | "hobbies"
+                | "values"
+                | "preferences"
+                | "summary" = "personal";
+
+            const titleLower = sectionTitle.toLowerCase();
+            if (titleLower.includes("family") || titleLower.includes("home life")) {
+                type = "family";
+            } else if (
+                titleLower.includes("hobbies") ||
+                titleLower.includes("interests") ||
+                titleLower.includes("games") ||
+                titleLower.includes("media")
+            ) {
+                type = "hobbies";
+            } else if (
+                titleLower.includes("values") ||
+                titleLower.includes("principles") ||
+                titleLower.includes("personality")
+            ) {
+                type = "values";
+            } else if (
+                titleLower.includes("preferences") ||
+                titleLower.includes("routine") ||
+                titleLower.includes("habits")
+            ) {
+                type = "preferences";
+            }
+
+            chunks.push({
+                content: `${sectionTitle}\n\n${sectionContent}`,
+                metadata: {
+                    source: "personal-knowledge",
+                    type,
+                    section: sectionTitle,
+                },
+            });
+        }
+
+        console.log(`   ✓ Parsed ${chunks.length} sections from nick-info.md`);
+    } catch (error) {
+        console.warn(`   ⚠️  Could not read nick-info.md: ${error}`);
+        console.warn("   Continuing with resume data only...");
+    }
+
+    return chunks;
 }
 
 function createChunks(): KnowledgeChunk[] {
@@ -203,9 +297,18 @@ async function main() {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Create chunks
-    const chunks = createChunks();
-    console.log(`📝 Created ${chunks.length} chunks from resume data\n`);
+    // Create chunks from resume
+    console.log("📝 Creating chunks from resume data...");
+    const resumeChunks = createChunks();
+    console.log(`   ✓ Created ${resumeChunks.length} chunks from resume\n`);
+
+    // Create chunks from personal knowledge
+    console.log("📚 Parsing personal knowledge from nick-info.md...");
+    const personalChunks = parsePersonalKnowledge();
+
+    // Combine all chunks
+    const chunks = [...resumeChunks, ...personalChunks];
+    console.log(`\n📊 Total chunks to process: ${chunks.length}\n`);
 
     // Clear existing chunks (optional - comment out to append)
     console.log("🗑️  Clearing existing knowledge chunks...");
