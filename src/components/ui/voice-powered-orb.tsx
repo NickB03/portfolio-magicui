@@ -271,12 +271,16 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       resizeObserver.observe(container);
       resize();
 
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
       let lastTime = 0;
       let currentRot = 0;
       let simulatedActivity = 0;
 
       const update = (t: number) => {
-        rafId = requestAnimationFrame(update);
+        if (!prefersReducedMotion) {
+          rafId = requestAnimationFrame(update);
+        }
         if (!program) return;
 
         const dt = (t - lastTime) * 0.001;
@@ -310,6 +314,7 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
         }
       };
 
+      // Render at least one frame; loop continues only if motion is allowed
       rafId = requestAnimationFrame(update);
 
       return () => {

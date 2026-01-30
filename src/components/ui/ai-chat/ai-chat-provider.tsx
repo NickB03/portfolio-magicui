@@ -5,6 +5,7 @@ import {
     useContext,
     useState,
     useCallback,
+    useRef,
     type ReactNode,
 } from "react";
 
@@ -12,6 +13,7 @@ interface Message {
     id: string;
     role: "user" | "assistant";
     content: string;
+    isError?: boolean;
 }
 
 interface AIChatContextType {
@@ -23,6 +25,7 @@ interface AIChatContextType {
     isLoading: boolean;
     sendMessage: (content: string) => Promise<void>;
     clearMessages: () => void;
+    retryLastMessage: () => void;
 }
 
 const AIChatContext = createContext<AIChatContextType | null>(null);
@@ -40,6 +43,7 @@ export function useAIChat() {
             isLoading: false,
             sendMessage: async () => {},
             clearMessages: () => {},
+            retryLastMessage: () => {},
         };
     }
     return context;
@@ -49,10 +53,13 @@ interface AIChatProviderProps {
     children: ReactNode;
 }
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export function AIChatProvider({ children }: AIChatProviderProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const lastUserMessageRef = useRef<string>("");
 
     const open = useCallback(() => setIsOpen(true), []);
     const close = useCallback(() => setIsOpen(false), []);
@@ -62,6 +69,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
 
     const sendMessage = useCallback(async (content: string) => {
         if (!content.trim() || isLoading) return;
+
+        lastUserMessageRef.current = content.trim();
 
         const userMessage: Message = {
             id: `user-${Date.now()}`,
@@ -79,12 +88,18 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             { id: assistantId, role: "assistant", content: "" },
         ]);
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
         try {
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: content }),
+                signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 // Try to parse error response
@@ -99,7 +114,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                                 msg.id === assistantId
                                     ? {
                                         ...msg,
-                                        content: errorData.message || "The AI assistant is temporarily unavailable due to high usage. Please try again in a few minutes."
+                                        content: errorData.message || "The AI assistant is temporarily unavailable due to high usage. Please try again in a few minutes.",
+                                        isError: true,
                                     }
                                     : msg
                             )
@@ -114,7 +130,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                                 msg.id === assistantId
                                     ? {
                                         ...msg,
-                                        content: errorData.message
+                                        content: errorData.message,
+                                        isError: true,
                                     }
                                     : msg
                             )
@@ -150,14 +167,19 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 );
             }
         } catch (error) {
+            clearTimeout(timeoutId);
             console.error("Chat error:", error);
+
+            const isTimeout = error instanceof DOMException && error.name === "AbortError";
             setMessages((prev) =>
                 prev.map((msg) =>
                     msg.id === assistantId
                         ? {
                             ...msg,
-                            content:
-                                "Sorry, I couldn't process your request. Please try again.",
+                            content: isTimeout
+                                ? "Request timed out. Please check your connection and try again."
+                                : "Sorry, I couldn't process your request. Please try again.",
+                            isError: true,
                         }
                         : msg
                 )
@@ -166,6 +188,21 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             setIsLoading(false);
         }
     }, [isLoading]);
+
+    const retryLastMessage = useCallback(() => {
+        if (!lastUserMessageRef.current || isLoading) return;
+        // Remove the last assistant (error) message before retrying
+        setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "assistant" && last.isError) {
+                return prev.slice(0, -1);
+            }
+            return prev;
+        });
+        // Use setTimeout to let state update before sending
+        const msg = lastUserMessageRef.current;
+        setTimeout(() => sendMessage(msg), 0);
+    }, [isLoading, sendMessage]);
 
     return (
         <AIChatContext.Provider
@@ -178,6 +215,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 isLoading,
                 sendMessage,
                 clearMessages,
+                retryLastMessage,
             }}
         >
             {children}
