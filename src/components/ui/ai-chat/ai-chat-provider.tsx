@@ -99,9 +99,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 signal: controller.signal,
             });
 
-            clearTimeout(timeoutId);
-
             if (!response.ok) {
+                clearTimeout(timeoutId);
                 // Try to parse error response
                 const contentType = response.headers.get("content-type");
                 if (contentType?.includes("application/json")) {
@@ -166,8 +165,20 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                     )
                 );
             }
+
+            // Flush any remaining bytes from the decoder
+            const remaining = decoder.decode();
+            if (remaining) {
+                accumulatedContent += remaining;
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === assistantId
+                            ? { ...msg, content: accumulatedContent }
+                            : msg
+                    )
+                );
+            }
         } catch (error) {
-            clearTimeout(timeoutId);
             console.error("Chat error:", error);
 
             const isTimeout = error instanceof DOMException && error.name === "AbortError";
@@ -185,6 +196,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 )
             );
         } finally {
+            clearTimeout(timeoutId);
             setIsLoading(false);
         }
     }, [isLoading]);

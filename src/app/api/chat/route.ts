@@ -196,49 +196,61 @@ IMPORTANT:
     const decoder = new TextDecoder();
     let buffer = "";
 
+    function processSSELine(line: string, controller: ReadableStreamDefaultController) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) return;
+
+        try {
+            const json = JSON.parse(trimmed.slice(6));
+            const candidate = json.candidates?.[0];
+            const text = candidate?.content?.parts?.[0]?.text;
+
+            // Check for non-normal finish reasons (SAFETY, RECITATION, etc.)
+            const finishReason = candidate?.finishReason;
+            if (finishReason && finishReason !== "STOP") {
+                console.warn(`Gemini stream ended with finishReason: ${finishReason}`, {
+                    safetyRatings: candidate?.safetyRatings,
+                });
+            }
+
+            if (text) {
+                controller.enqueue(new TextEncoder().encode(text));
+            }
+        } catch {
+            // Skip invalid JSON lines
+        }
+    }
+
     return new ReadableStream({
         async pull(controller) {
-            const { done, value } = await reader.read();
+            try {
+                const { done, value } = await reader.read();
 
-            if (done) {
-                // Process any remaining buffered data
-                if (buffer.trim()) {
-                    const line = buffer.trim();
-                    if (line.startsWith("data: ")) {
-                        try {
-                            const json = JSON.parse(line.slice(6));
-                            const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-                            if (text) {
-                                controller.enqueue(new TextEncoder().encode(text));
-                            }
-                        } catch {
-                            // Skip invalid JSON
-                        }
+                if (done) {
+                    // Flush any remaining bytes from the decoder
+                    buffer += decoder.decode();
+                    if (buffer.trim()) {
+                        processSSELine(buffer, controller);
                     }
+                    controller.close();
+                    return;
                 }
-                controller.close();
-                return;
-            }
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            // Keep the last element — it may be an incomplete line
-            buffer = lines.pop() ?? "";
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                // Keep the last element — it may be an incomplete line
+                buffer = lines.pop() ?? "";
 
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (trimmed.startsWith("data: ")) {
-                    try {
-                        const json = JSON.parse(trimmed.slice(6));
-                        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-                        if (text) {
-                            controller.enqueue(new TextEncoder().encode(text));
-                        }
-                    } catch {
-                        // Skip invalid JSON lines
-                    }
+                for (const line of lines) {
+                    processSSELine(line, controller);
                 }
+            } catch (error) {
+                console.error("Stream read error:", error);
+                controller.error(error);
             }
+        },
+        cancel() {
+            reader.cancel();
         },
     });
 }
@@ -328,7 +340,6 @@ export async function POST(request: Request) {
         return new Response(stream, {
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
-                "Transfer-Encoding": "chunked",
             },
         });
     } catch (error: unknown) {
