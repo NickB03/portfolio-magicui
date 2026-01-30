@@ -3,7 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FlickeringGrid } from "@/components/magicui/flickering-grid";
@@ -23,6 +23,10 @@ const geistMono = Geist_Mono({
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-mono",
 });
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(DATA.url),
@@ -105,7 +109,7 @@ export default function RootLayout({
                       "linear-gradient(to bottom, transparent, black 100px)",
                   }}
                 >
-                  <div className="max-w-2xl mx-auto pt-24 pb-12 sm:pt-32 sm:pb-24 px-6">
+                  <div className="max-w-2xl mx-auto pt-28 pb-12 sm:pt-32 sm:pb-24 px-6">
                     {children}
                   </div>
                 </div>
@@ -136,7 +140,7 @@ export default function RootLayout({
                       "linear-gradient(to bottom, transparent, black 100px)",
                   }}
                 >
-                  <div className="max-w-2xl mx-auto pt-24 pb-12 sm:pt-32 sm:pb-24 px-6">
+                  <div className="max-w-2xl mx-auto pt-28 pb-12 sm:pt-32 sm:pb-24 px-6">
                     {children}
                   </div>
                 </div>
