@@ -194,23 +194,42 @@ IMPORTANT:
     // Transform the SSE stream to extract just the text
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
+    let buffer = "";
 
     return new ReadableStream({
         async pull(controller) {
             const { done, value } = await reader.read();
 
             if (done) {
+                // Process any remaining buffered data
+                if (buffer.trim()) {
+                    const line = buffer.trim();
+                    if (line.startsWith("data: ")) {
+                        try {
+                            const json = JSON.parse(line.slice(6));
+                            const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (text) {
+                                controller.enqueue(new TextEncoder().encode(text));
+                            }
+                        } catch {
+                            // Skip invalid JSON
+                        }
+                    }
+                }
                 controller.close();
                 return;
             }
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n");
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            // Keep the last element — it may be an incomplete line
+            buffer = lines.pop() ?? "";
 
             for (const line of lines) {
-                if (line.startsWith("data: ")) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith("data: ")) {
                     try {
-                        const json = JSON.parse(line.slice(6));
+                        const json = JSON.parse(trimmed.slice(6));
                         const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
                         if (text) {
                             controller.enqueue(new TextEncoder().encode(text));
