@@ -1,6 +1,6 @@
 "use client";
 
-import { Dock, DockIcon } from "@/components/magicui/dock";
+import { Dock, DockIcon, DockItem } from "@/components/magicui/dock";
 import BlurFade from "@/components/magicui/blur-fade";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -10,20 +10,47 @@ import {
 } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAIChat } from "@/components/ui/ai-chat/ai-chat-provider";
 import { SiriOrb } from "@/components/ui/ai-chat/siri-orb";
 import { ModeToggle } from "@/components/mode-toggle";
 
+const AI_LABEL_SEEN_KEY = "ai-chat-label-seen";
+
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
+  const [showAILabel, setShowAILabel] = useState(false);
   const { open: openAIChat } = useAIChat();
+
+  const collapseLabel = useCallback(() => {
+    setShowAILabel(false);
+    try {
+      localStorage.setItem(AI_LABEL_SEEN_KEY, "1");
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  // Show label on first visit, auto-collapse after 4s
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(AI_LABEL_SEEN_KEY)) {
+        setShowAILabel(true);
+        const timer = setTimeout(collapseLabel, 4000);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // localStorage unavailable — don't show label
+    }
+  }, [collapseLabel]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
     const handleScroll = () => {
       setIsVisible(false);
+      // Collapse label immediately on scroll
+      if (showAILabel) collapseLabel();
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setIsVisible(true);
@@ -45,7 +72,7 @@ export default function Navbar() {
       }
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [showAILabel, collapseLabel]);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-4 z-30">
@@ -146,11 +173,29 @@ export default function Navbar() {
                   <button
                     onClick={openAIChat}
                     type="button"
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl"
+                    aria-label="Ask AI"
+                    className="relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl"
                   >
-                    <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors flex items-center justify-center">
-                      <SiriOrb size="sm" />
-                    </DockIcon>
+                    <DockItem className="rounded-3xl cursor-pointer bg-background text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors overflow-hidden">
+                      <div className="flex items-center justify-center h-full aspect-square shrink-0">
+                        <SiriOrb size="sm" />
+                      </div>
+                      <div
+                        className="grid transition-[grid-template-columns] duration-200 ease-out motion-reduce:transition-none"
+                        style={{
+                          gridTemplateColumns: showAILabel ? "1fr" : "0fr",
+                        }}
+                      >
+                        <span
+                          className={cn(
+                            "overflow-hidden whitespace-nowrap text-xs font-medium pr-3 transition-opacity duration-150 ease-out motion-reduce:transition-none",
+                            showAILabel ? "opacity-100" : "opacity-0"
+                          )}
+                        >
+                          Ask AI
+                        </span>
+                      </div>
+                    </DockItem>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent

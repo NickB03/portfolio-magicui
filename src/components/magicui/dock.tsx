@@ -87,5 +87,41 @@ const DockIcon = ({ className, children }: DockIconProps) => {
   );
 };
 
-export { Dock, DockIcon };
-export type { DockProps, DockIconProps };
+interface DockItemProps {
+  className?: string;
+  children?: ReactNode;
+}
+
+const DockItem = ({ className, children }: DockItemProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const context = useContext(DockContext);
+
+  if (!context) {
+    throw new Error("DockItem must be used within a Dock component");
+  }
+
+  const { mouseX, magnification, distance } = context;
+
+  const distanceCalc = useTransform(mouseX, (val: number) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
+
+  const heightSize = useSpring(
+    useTransform(distanceCalc, [-distance, 0, distance], [BASE_SIZE, magnification, BASE_SIZE]),
+    SPRING
+  );
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ height: heightSize }}
+      className={cn("relative flex items-center shrink-0", className)}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+export { Dock, DockIcon, DockItem };
+export type { DockProps, DockIconProps, DockItemProps };
