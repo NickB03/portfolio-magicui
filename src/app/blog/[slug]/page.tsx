@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { allPosts } from "content-collections";
 import { formatDate } from "@/lib/utils";
 import { DATA } from "@/data/resume";
