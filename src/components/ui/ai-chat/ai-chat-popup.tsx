@@ -121,16 +121,13 @@ export function AIChatPopup() {
                     "How does Nick approach problem-solving?",
                     "What does Nick do for fun?",
                 ].map((suggestion, i) => (
-                    <motion.button
+                    <button
                         key={suggestion}
                         onClick={() => sendMessage(suggestion)}
-                        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 + i * 0.05 }}
                         className="group rounded-xl border border-chat-border bg-chat-surface/50 px-3.5 py-2.5 text-sm text-chat-text-secondary transition-all hover:border-chat-border hover:bg-chat-surface hover:text-chat-text active:scale-95"
                     >
                         {suggestion}
-                    </motion.button>
+                    </button>
                 ))}
             </div>
         </motion.div>
