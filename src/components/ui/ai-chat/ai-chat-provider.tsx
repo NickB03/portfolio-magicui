@@ -60,12 +60,20 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const lastUserMessageRef = useRef<string>("");
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const open = useCallback(() => setIsOpen(true), []);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-    const clearMessages = useCallback(() => setMessages([]), []);
+    const clearMessages = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+        setIsLoading(false);
+        setMessages([]);
+    }, []);
 
     const sendMessage = useCallback(async (content: string) => {
         if (!content.trim() || isLoading) return;
@@ -89,6 +97,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
         ]);
 
         const controller = new AbortController();
+        abortControllerRef.current = controller;
         const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
         try {
@@ -197,6 +206,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             );
         } finally {
             clearTimeout(timeoutId);
+            abortControllerRef.current = null;
             setIsLoading(false);
         }
     }, [isLoading]);

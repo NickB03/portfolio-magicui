@@ -15,74 +15,87 @@ import { config } from "dotenv";
 // Load environment variables from .env.local
 config({ path: ".env.local" });
 
-// Resume data - imported as raw content since we're in a script
-const RESUME_DATA = {
-    name: "Nick Bohmer",
-    location: "Dallas, TX",
-    summary: `I am a product leader and hands-on builder who bridges the gap between enterprise strategy and execution with a focus on building industry leading managed SD-WAN & SASE solutions.
-
-Over the past year, I've learned to design, build, and launch full-stack AI applications, taking ideas from prototype to production using modern development workflows and CI/CD pipelines.
-
-By working closely with multi-agent frameworks like Google's Agent Development Kit, I've gained firsthand insight into the strengths and limitations of modern AI systems. This perspective helps me collaborate more effectively with engineering teams, drive product decisions grounded in real implementation challenges, and push the boundaries of what's possible in AI-driven enterprise products.`,
-
-    work: [
-        {
-            company: "AT&T",
-            title: "Associate Director (Value Added Solutions)",
-            period: "August 2025 - Current",
-            description: `Led major product portfolio including Global Solution Center and Network Function Virtualization, partnering with executives to align roadmaps with business strategy.
-Directed end-to-end development of a modern AI-powered platform (Next.js, React, Python) throughout the full lifecycle, significantly improving seller experience.
-Spearheaded LLM workflow integrations using LangSmith to drive AI adoption and operational efficiency.
-Selected for Growth Council to lead AI-focused product evolution initiatives for business networks.`,
+// Resume data - written in conversational first-person voice for natural AI responses
+const RESUME_CHUNKS = [
+    {
+        content: `I'm a product leader and hands-on builder. My professional focus has been bridging enterprise strategy and execution, particularly around managed SD-WAN and SASE solutions. Over the past year I've also taught myself to design, build, and launch full-stack AI applications — taking ideas from prototype to production with modern dev workflows and CI/CD pipelines. Working hands-on with multi-agent frameworks like Google's Agent Development Kit gave me real insight into the strengths and limitations of AI systems, which helps me collaborate better with engineering teams and make product decisions grounded in actual implementation challenges.`,
+        metadata: {
+            source: "resume",
+            type: "summary" as const,
+            topics: ["product-management", "ai", "sd-wan", "leadership", "full-stack"],
         },
-        {
-            company: "AT&T",
-            title: "Lead Product Management & Development (Edge Solutions)",
-            period: "August 2022 - August 2025",
-            description: `Took network-integrated SD-WAN solution from concept to market launch, managing significant budget and cross-functional teams to deploy an extensive device fleet.
-Developed comprehensive GTM strategies and customer-facing collateral to position Edge solutions effectively and ensure consistent messaging.
-Secured "Market Leader" recognition from top industry analysts (Frost & Sullivan, Vertical Systems Group) through strategic engagement and product differentiation.`,
-        },
-        {
-            company: "AT&T",
-            title: "Solutions Architect",
-            period: "August 2020 - July 2022",
-            description: `Designed tailored network and security solutions (SD-WAN, SASE) for global enterprise clients, driving significant product adoption.
-Managed executive-level relationships generating substantial annual revenue, serving as a trusted advisor on network transformation.
-Orchestrated collaboration between engineering, marketing, and sales to ensure solutions aligned with strategic vision.`,
-        },
-        {
-            company: "AT&T",
-            title: "Sr. Edge Solutions Specialist (SD-WAN & MNS SME)",
-            period: "January 2019 - July 2020",
-            description: `Key driver in launching the Edge Specialist team, increasing service adoption by effectively positioning SD-WAN and security solutions.
-Led 20+ SD-WAN workshops translating technical concepts for stakeholders, directly generating significant new revenue.
-Created and delivered specialized technical training for sales teams to enhance expertise in Managed Network Services.`,
-        },
-    ],
-
-    projects: [
-        {
-            title: "vana.bot",
-            description: "Full-stack AI chat application with interactive artifacts (React components, SVG, Mermaid diagrams) rendering live in-browser.",
-            technologies: ["React", "TypeScript", "Vite", "OpenRouter", "Supabase", "PostgreSQL", "Deno"],
-            url: "https://vana.bot",
-        },
-    ],
-
-    useCases: [
-        {
-            title: "BreeziNet",
-            description: "Prototyped and pitched a unified fiber & wireless offering in a two-day workshop, securing executive buy-in for development.",
-        },
-    ],
-
-    contact: {
-        email: "nbohmer@gmail.com",
-        linkedin: "https://www.linkedin.com/in/nickbohmer",
-        github: "https://github.com/NickB03",
     },
-};
+    {
+        content: `Since August 2025 I've been an Associate Director at AT&T leading Value Added Solutions. I run a major product portfolio that includes the Global Solution Center and Network Function Virtualization, working closely with executives to align roadmaps with business strategy. I also directed the end-to-end development of an AI-powered platform built with Next.js, React, and Python — took it through the full lifecycle and it significantly improved the seller experience. I've been driving LLM workflow integrations using LangSmith to push AI adoption, and I was selected for AT&T's Growth Council to lead AI-focused product evolution for business networks.`,
+        metadata: {
+            source: "resume",
+            type: "work" as const,
+            title: "Associate Director (Value Added Solutions)",
+            company: "AT&T",
+            period: "August 2025 - Current",
+            topics: ["at&t", "leadership", "ai", "product-management", "next.js", "langsmith"],
+        },
+    },
+    {
+        content: `From August 2022 to August 2025 I led Product Management & Development for AT&T's Edge Solutions. The big thing during this stretch was taking a network-integrated SD-WAN solution from concept all the way to market launch — managing a significant budget and cross-functional teams to deploy a large device fleet. I built out the GTM strategies and customer-facing collateral to position the Edge solutions. One of the highlights was earning "Market Leader" recognition from top industry analysts like Frost & Sullivan and Vertical Systems Group.`,
+        metadata: {
+            source: "resume",
+            type: "work" as const,
+            title: "Lead Product Management & Development (Edge Solutions)",
+            company: "AT&T",
+            period: "August 2022 - August 2025",
+            topics: ["at&t", "sd-wan", "product-launch", "gtm", "analyst-relations"],
+        },
+    },
+    {
+        content: `Before leading product, I was a Solutions Architect at AT&T from August 2020 to July 2022. I designed tailored network and security solutions — SD-WAN, SASE — for global enterprise clients and drove significant product adoption. I managed executive-level relationships that generated substantial annual revenue, basically serving as a trusted advisor on network transformation. A lot of the role was orchestrating collaboration between engineering, marketing, and sales to keep solutions aligned with the strategic vision.`,
+        metadata: {
+            source: "resume",
+            type: "work" as const,
+            title: "Solutions Architect",
+            company: "AT&T",
+            period: "August 2020 - July 2022",
+            topics: ["at&t", "solutions-architecture", "sd-wan", "sase", "enterprise"],
+        },
+    },
+    {
+        content: `My first role in the SD-WAN space was as a Sr. Edge Solutions Specialist at AT&T from January 2019 to July 2020. I was a key driver in launching the Edge Specialist team and increasing service adoption by positioning SD-WAN and security solutions effectively. I led over 20 SD-WAN workshops where I translated technical concepts for stakeholders, which directly generated significant new revenue. I also created and delivered specialized technical training for sales teams to build their expertise in Managed Network Services.`,
+        metadata: {
+            source: "resume",
+            type: "work" as const,
+            title: "Sr. Edge Solutions Specialist (SD-WAN & MNS SME)",
+            company: "AT&T",
+            period: "January 2019 - July 2020",
+            topics: ["at&t", "sd-wan", "training", "workshops", "sales-enablement"],
+        },
+    },
+    {
+        content: `One of my main side projects is vana.bot — a full-stack AI chat application I built that renders interactive artifacts like React components, SVG graphics, and Mermaid diagrams live in the browser. It's built with React, TypeScript, and Vite on the frontend, uses OpenRouter for LLM access, and has a Supabase/PostgreSQL backend running on Deno. You can check it out at https://vana.bot. It's a good example of me taking an AI idea all the way to a shipped, production application.`,
+        metadata: {
+            source: "resume",
+            type: "project" as const,
+            title: "vana.bot",
+            topics: ["ai", "react", "typescript", "supabase", "full-stack", "side-project"],
+        },
+    },
+    {
+        content: `BreeziNet was a concept I prototyped and pitched during a two-day workshop — a unified fiber and wireless offering. I managed to secure executive buy-in for further development. It's a good example of how I work: move fast, build something tangible, and use it to sell the vision.`,
+        metadata: {
+            source: "resume",
+            type: "use_case" as const,
+            title: "BreeziNet",
+            topics: ["innovation", "prototyping", "fiber", "wireless"],
+        },
+    },
+    {
+        content: `You can reach me at nbohmer@gmail.com, find me on LinkedIn at linkedin.com/in/nickbohmer, or check out my code on GitHub at github.com/NickB03. I'm based in Dallas, TX.`,
+        metadata: {
+            source: "resume",
+            type: "contact" as const,
+            topics: ["contact", "email", "linkedin", "github", "location"],
+        },
+    },
+];
 
 interface KnowledgeChunk {
     content: string;
@@ -103,14 +116,32 @@ interface KnowledgeChunk {
         company?: string;
         period?: string;
         section?: string;
+        topics?: string[];
     };
 }
+
+// Map section titles to type and topics for richer metadata
+const SECTION_METADATA: Record<string, { type: KnowledgeChunk["metadata"]["type"]; topics: string[] }> = {
+    "core identity": { type: "personal", topics: ["name", "location", "identity"] },
+    "family & home life": { type: "family", topics: ["family", "wife", "kids", "dogs", "home"] },
+    "hobbies & interests": { type: "hobbies", topics: ["3d-printing", "ai-projects", "movies", "hobbies", "crafting"] },
+    "photography & video": { type: "hobbies", topics: ["photography", "video", "cinematography", "cameras", "creative"] },
+    "personality": { type: "values", topics: ["personality", "traits", "character"] },
+    "habits & quirks": { type: "preferences", topics: ["snacks", "coffee", "morning-routine", "habits"] },
+    "books, tv & music": { type: "hobbies", topics: ["books", "reading", "music", "tv", "audiobooks", "brandon-sanderson"] },
+    "gaming": { type: "hobbies", topics: ["gaming", "video-games", "fortnite", "fps"] },
+    "values & principles": { type: "values", topics: ["values", "principles", "philosophy", "beliefs"] },
+    "how i learn": { type: "values", topics: ["learning", "hands-on", "style"] },
+    "perfect weekend": { type: "preferences", topics: ["weekend", "family", "outdoors", "routine", "ideal-day"] },
+    "travel goals": { type: "preferences", topics: ["travel", "photography", "northern-lights"] },
+    "stress reset": { type: "preferences", topics: ["stress", "coping", "gaming", "projects"] },
+    "about this ai assistant": { type: "personal", topics: ["ai-assistant", "rag", "portfolio", "technical-stack"] },
+};
 
 function parsePersonalKnowledge(): KnowledgeChunk[] {
     const chunks: KnowledgeChunk[] = [];
 
     try {
-        // Read the personal knowledge file
         const filePath = join(process.cwd(), "nick-info.md");
         const content = readFileSync(filePath, "utf-8");
 
@@ -126,50 +157,20 @@ function parsePersonalKnowledge(): KnowledgeChunk[] {
                 continue;
             }
 
-            // Get the full section content (remove the title line)
             const sectionContent = lines.slice(1).join("\n").trim();
-
             if (!sectionContent) continue;
 
-            // Determine the type based on section title
-            let type:
-                | "personal"
-                | "family"
-                | "hobbies"
-                | "values"
-                | "preferences"
-                | "summary" = "personal";
-
+            // Look up metadata from the map, fall back to defaults
             const titleLower = sectionTitle.toLowerCase();
-            if (titleLower.includes("family") || titleLower.includes("home life")) {
-                type = "family";
-            } else if (
-                titleLower.includes("hobbies") ||
-                titleLower.includes("interests") ||
-                titleLower.includes("games") ||
-                titleLower.includes("media")
-            ) {
-                type = "hobbies";
-            } else if (
-                titleLower.includes("values") ||
-                titleLower.includes("principles") ||
-                titleLower.includes("personality")
-            ) {
-                type = "values";
-            } else if (
-                titleLower.includes("preferences") ||
-                titleLower.includes("routine") ||
-                titleLower.includes("habits")
-            ) {
-                type = "preferences";
-            }
+            const meta = SECTION_METADATA[titleLower] ?? { type: "personal" as const, topics: [] };
 
             chunks.push({
-                content: `${sectionTitle}\n\n${sectionContent}`,
+                content: `${sectionContent}`,
                 metadata: {
                     source: "personal-knowledge",
-                    type,
+                    type: meta.type,
                     section: sectionTitle,
+                    topics: meta.topics,
                 },
             });
         }
@@ -184,65 +185,7 @@ function parsePersonalKnowledge(): KnowledgeChunk[] {
 }
 
 function createChunks(): KnowledgeChunk[] {
-    const chunks: KnowledgeChunk[] = [];
-
-    // Summary chunk
-    chunks.push({
-        content: `About Nick Bohmer: ${RESUME_DATA.summary}`,
-        metadata: {
-            source: "resume",
-            type: "summary",
-        },
-    });
-
-    // Work experience chunks - one per role
-    for (const job of RESUME_DATA.work) {
-        chunks.push({
-            content: `${job.title} at ${job.company} (${job.period}): ${job.description}`,
-            metadata: {
-                source: "resume",
-                type: "work",
-                title: job.title,
-                company: job.company,
-                period: job.period,
-            },
-        });
-    }
-
-    // Project chunks
-    for (const project of RESUME_DATA.projects) {
-        chunks.push({
-            content: `Project: ${project.title} - ${project.description} Technologies used: ${project.technologies.join(", ")}. ${project.url ? `Live at ${project.url}` : ""}`,
-            metadata: {
-                source: "resume",
-                type: "project",
-                title: project.title,
-            },
-        });
-    }
-
-    // Use case chunks
-    for (const useCase of RESUME_DATA.useCases) {
-        chunks.push({
-            content: `Case Study: ${useCase.title} - ${useCase.description}`,
-            metadata: {
-                source: "resume",
-                type: "use_case",
-                title: useCase.title,
-            },
-        });
-    }
-
-    // Contact info chunk
-    chunks.push({
-        content: `Contact Nick Bohmer: Email ${RESUME_DATA.contact.email}, LinkedIn ${RESUME_DATA.contact.linkedin}, GitHub ${RESUME_DATA.contact.github}. Located in ${RESUME_DATA.location}.`,
-        metadata: {
-            source: "resume",
-            type: "contact",
-        },
-    });
-
-    return chunks;
+    return RESUME_CHUNKS;
 }
 
 async function generateEmbedding(text: string): Promise<number[]> {
