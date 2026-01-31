@@ -47,9 +47,10 @@ npx tsx scripts/verify-knowledge.ts  # Verify knowledge base entries
 - **Chat-specific CSS variables**: `--chat-bg`, `--chat-surface`, `--chat-border`, etc.
 
 ### Deployment
-- **Cloudflare Pages** via OpenNext (`@opennextjs/cloudflare`)
-- **Wrangler config**: `wrangler.jsonc` with `nodejs_compat` compatibility flag
-- Build output goes through `.open-next/` (worker.js + static assets)
+- **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
+- **Wrangler config**: `wrangler.json` with `nodejs_compat` compatibility flag
+- Build output goes through `.open-next/` (worker.js + assets/)
+- Static assets served via Workers `assets` binding (not Pages)
 - Do not use `export const runtime = 'edge'` — OpenNext handles the runtime
 
 ### Key Path Aliases
