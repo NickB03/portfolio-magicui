@@ -1,4 +1,7 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { withContentCollections } from "@content-collections/next";
+
+initOpenNextCloudflareForDev();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

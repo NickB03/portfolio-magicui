@@ -1,7 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-export const runtime = "edge";
-
 const SYSTEM_PROMPT = `You are Nick's AI — a friendly, knowledgeable assistant on Nick Bohmer's portfolio site. Think of yourself as a colleague who knows Nick well and genuinely enjoys telling people about him.
 
 YOUR VOICE:
