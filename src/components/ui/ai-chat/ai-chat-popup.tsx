@@ -115,10 +115,10 @@ export function AIChatPopup() {
             </div>
             <div className="flex flex-wrap justify-center gap-2.5 min-w-0">
                 {[
-                    "What's Nick building right now?",
-                    "What does Nick do outside of work?",
-                    "How did Nick get into AI?",
+                    "What does Nick do at AT&T?",
+                    "What are Nick's hobbies?",
                     "What's Nick like to work with?",
+                    "What does Nick's ideal weekend look like?",
                 ].map((suggestion, i) => (
                     <button
                         key={suggestion}

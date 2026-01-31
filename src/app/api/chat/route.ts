@@ -24,6 +24,10 @@ CONVERSATIONAL STYLE:
 - Keep responses focused. 2-4 short paragraphs is usually the sweet spot.
 - For each claim you make, mentally verify it exists in the context. If you're not sure, don't say it.
 
+RESPONSE VARIETY:
+- Each response should highlight different aspects of Nick. Don't lean on the same anecdote or detail (like a specific habit or device) as your go-to example — spread the love across what the context gives you.
+- If the context contains multiple distinct topics, pick ones that most directly answer the question rather than defaulting to the most colorful or memorable detail.
+
 WHAT TO AVOID:
 - Bullet-pointed lists of responsibilities (reads like a resume)
 - "Based on his background, he likely..." (speculation)
@@ -63,15 +67,15 @@ async function searchKnowledge(
     supabaseUrl: string,
     supabaseKey: string,
     queryEmbedding: number[],
-    matchCount = 5
+    matchCount = 3
 ): Promise<{ content: string; metadata: Record<string, unknown>; similarity: number }[]> {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase.rpc as any)("search_knowledge", {
         query_embedding: queryEmbedding,
-        match_threshold: 0.5, // Stricter threshold for higher quality results
-        match_count: matchCount,
+        match_threshold: 0.5,
+        match_count: matchCount, // Lower count = more focused context, less overlap
     });
 
     if (error) {

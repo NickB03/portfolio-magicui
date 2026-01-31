@@ -124,11 +124,21 @@ interface KnowledgeChunk {
 const SECTION_METADATA: Record<string, { type: KnowledgeChunk["metadata"]["type"]; topics: string[] }> = {
     "core identity": { type: "personal", topics: ["name", "location", "identity"] },
     "family & home life": { type: "family", topics: ["family", "wife", "kids", "dogs", "home"] },
-    "hobbies & interests": { type: "hobbies", topics: ["3d-printing", "ai-projects", "movies", "hobbies", "crafting"] },
+    "hobbies & interests": { type: "hobbies", topics: ["hobbies"] },
+    "hobbies & interests > 3d printing & prop making": { type: "hobbies", topics: ["3d-printing", "props", "crafting", "painting"] },
+    "hobbies & interests > building ai projects": { type: "hobbies", topics: ["ai-projects", "side-projects", "building"] },
+    "hobbies & interests > movies": { type: "hobbies", topics: ["movies", "theater", "entertainment"] },
     "photography & video": { type: "hobbies", topics: ["photography", "video", "cinematography", "cameras", "creative"] },
+    "photography & video > photography": { type: "hobbies", topics: ["photography", "cameras", "sony", "candid", "concerts"] },
+    "photography & video > video & cinematography": { type: "hobbies", topics: ["video", "cinematography", "drones", "weddings"] },
     "personality": { type: "values", topics: ["personality", "traits", "character"] },
-    "habits & quirks": { type: "preferences", topics: ["snacks", "coffee", "morning-routine", "habits"] },
-    "books, tv & music": { type: "hobbies", topics: ["books", "reading", "music", "tv", "audiobooks", "brandon-sanderson"] },
+    "habits & quirks": { type: "preferences", topics: ["habits"] },
+    "habits & quirks > work snacking": { type: "preferences", topics: ["snacks", "food", "protein", "coffee", "health"] },
+    "habits & quirks > morning routine": { type: "preferences", topics: ["morning-routine", "coffee", "daily-habits"] },
+    "books, tv & music": { type: "hobbies", topics: ["entertainment"] },
+    "books, tv & music > books": { type: "hobbies", topics: ["books", "reading", "audiobooks", "brandon-sanderson", "sci-fi", "fantasy"] },
+    "books, tv & music > tv": { type: "hobbies", topics: ["tv", "always-sunny"] },
+    "books, tv & music > music": { type: "hobbies", topics: ["music", "taylor-swift", "spotify", "broadway"] },
     "gaming": { type: "hobbies", topics: ["gaming", "video-games", "fortnite", "fps"] },
     "values & principles": { type: "values", topics: ["values", "principles", "philosophy", "beliefs"] },
     "how i learn": { type: "values", topics: ["learning", "hands-on", "style"] },
@@ -160,19 +170,63 @@ function parsePersonalKnowledge(): KnowledgeChunk[] {
             const sectionContent = lines.slice(1).join("\n").trim();
             if (!sectionContent) continue;
 
-            // Look up metadata from the map, fall back to defaults
-            const titleLower = sectionTitle.toLowerCase();
-            const meta = SECTION_METADATA[titleLower] ?? { type: "personal" as const, topics: [] };
+            // Check if this section has ### subsections
+            const subsections = sectionContent.split(/^### /m);
 
-            chunks.push({
-                content: `${sectionContent}`,
-                metadata: {
-                    source: "personal-knowledge",
-                    type: meta.type,
-                    section: sectionTitle,
-                    topics: meta.topics,
-                },
-            });
+            if (subsections.length > 1) {
+                // First part before any ### is preamble — skip if empty
+                const preamble = subsections[0].trim();
+                if (preamble) {
+                    const titleLower = sectionTitle.toLowerCase();
+                    const meta = SECTION_METADATA[titleLower] ?? { type: "personal" as const, topics: [] };
+                    chunks.push({
+                        content: preamble,
+                        metadata: {
+                            source: "personal-knowledge",
+                            type: meta.type,
+                            section: sectionTitle,
+                            topics: meta.topics,
+                        },
+                    });
+                }
+
+                // Each ### subsection becomes its own chunk
+                for (let i = 1; i < subsections.length; i++) {
+                    const subLines = subsections[i].split("\n");
+                    const subTitle = subLines[0].trim();
+                    const subContent = subLines.slice(1).join("\n").trim();
+                    if (!subContent) continue;
+
+                    // Build a combined key for metadata lookup: "parent section > subsection"
+                    const subKey = `${sectionTitle.toLowerCase()} > ${subTitle.toLowerCase()}`;
+                    const parentKey = sectionTitle.toLowerCase();
+                    const meta = SECTION_METADATA[subKey] ?? SECTION_METADATA[parentKey] ?? { type: "personal" as const, topics: [] };
+
+                    chunks.push({
+                        content: subContent,
+                        metadata: {
+                            source: "personal-knowledge",
+                            type: meta.type,
+                            section: `${sectionTitle} > ${subTitle}`,
+                            topics: meta.topics,
+                        },
+                    });
+                }
+            } else {
+                // No subsections — store as a single chunk
+                const titleLower = sectionTitle.toLowerCase();
+                const meta = SECTION_METADATA[titleLower] ?? { type: "personal" as const, topics: [] };
+
+                chunks.push({
+                    content: sectionContent,
+                    metadata: {
+                        source: "personal-knowledge",
+                        type: meta.type,
+                        section: sectionTitle,
+                        topics: meta.topics,
+                    },
+                });
+            }
         }
 
         console.log(`   ✓ Parsed ${chunks.length} sections from nick-info.md`);
