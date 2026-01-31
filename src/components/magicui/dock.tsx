@@ -115,7 +115,7 @@ const DockItem = ({ className, children }: DockItemProps) => {
   return (
     <motion.div
       ref={ref}
-      style={{ height: heightSize }}
+      style={{ height: heightSize, minWidth: heightSize }}
       className={cn("relative flex items-center shrink-0", className)}
     >
       {children}
