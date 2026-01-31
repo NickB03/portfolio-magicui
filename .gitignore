@@ -36,6 +36,7 @@ yarn-error.log*
 next-env.d.ts
 .content-collections
 .open-next
+.wrangler
 
 supabase/.temp/
 supabase/.branches/
