@@ -67,7 +67,7 @@ async function searchKnowledge(
     supabaseUrl: string,
     supabaseKey: string,
     queryEmbedding: number[],
-    matchCount = 3
+    matchCount = 5
 ): Promise<{ content: string; metadata: Record<string, unknown>; similarity: number }[]> {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -75,7 +75,7 @@ async function searchKnowledge(
     const { data, error } = await (supabase.rpc as any)("search_knowledge", {
         query_embedding: queryEmbedding,
         match_threshold: 0.5,
-        match_count: matchCount, // Lower count = more focused context, less overlap
+        match_count: matchCount,
     });
 
     if (error) {
