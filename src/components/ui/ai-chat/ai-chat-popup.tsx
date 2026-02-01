@@ -257,7 +257,7 @@ export function AIChatPopup() {
                                 >
                                     <ArrowLeft className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 </button>
-                                <SiriOrb size="sm" className="!h-9 !w-9 sm:!h-10 sm:!w-10" phase={isLoading ? "thinking" : "idle"} />
+                                <SiriOrb size="md" phase={isLoading ? "thinking" : "idle"} />
                                 <div className="flex flex-col gap-0.5">
                                     <span className="text-[15px] sm:text-base font-semibold text-chat-text">Ask about Nick</span>
                                     <span className="text-xs sm:text-[13px] text-chat-text-secondary">Portfolio Assistant</span>

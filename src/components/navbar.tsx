@@ -1,6 +1,6 @@
 "use client";
 
-import { Dock, DockIcon, DockItem } from "@/components/magicui/dock";
+import { Dock, DockIcon, useDockContext, BASE_SIZE, SPRING } from "@/components/magicui/dock";
 import BlurFade from "@/components/magicui/blur-fade";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -10,38 +10,136 @@ import {
 } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useAIChat } from "@/components/ui/ai-chat/ai-chat-provider";
 import { SiriOrb } from "@/components/ui/ai-chat/siri-orb";
 import { ModeToggle } from "@/components/mode-toggle";
+import { useState } from "react";
 
 const AI_LABEL_SEEN_KEY = "ai-chat-label-seen";
+
+// Extra width added when the "Ask AI" label is visible (text ~36px + right padding ~12px)
+const LABEL_EXPANDED_WIDTH = 48;
+
+/**
+ * A dock-aware AI button using a two-zone layout:
+ * - Left zone: a square area (containerSize × containerSize) that centers the orb,
+ *   with the orb scaling from BASE_ICON_SIZE → magnification*ICON_SIZE_RATIO (same as DockIcon).
+ * - Right zone: "Ask AI" text, revealed/hidden via overflow-hidden + animated width.
+ *
+ * Collapsed: totalWidth = containerSize (identical to DockIcon).
+ * Expanded:  totalWidth = containerSize + labelExtra.
+ */
+function DockAIButton({
+  showLabel,
+  onClick,
+  className,
+}: {
+  showLabel: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { mouseX, magnification, distance } = useDockContext();
+
+  const distanceCalc = useTransform(mouseX, (val: number) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
+
+  // Height / square-zone width — same formula as DockIcon
+  const containerSize = useSpring(
+    useTransform(distanceCalc, [-distance, 0, distance], [BASE_SIZE, magnification, BASE_SIZE]),
+    SPRING
+  );
+
+  // Animate label extra width
+  const labelTarget = useMotionValue(0);
+  const labelExtra = useSpring(labelTarget, {
+    mass: 0.1,
+    stiffness: 170,
+    damping: 18,
+  });
+
+  useEffect(() => {
+    labelTarget.set(showLabel ? LABEL_EXPANDED_WIDTH : 0);
+  }, [showLabel, labelTarget]);
+
+  // Combine square zone + label expansion
+  const totalWidth = useTransform(
+    [containerSize, labelExtra],
+    ([size, extra]: number[]) => size + extra
+  );
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ width: totalWidth, height: containerSize }}
+      className={cn(
+        "relative flex items-center rounded-full shrink-0 overflow-hidden",
+        className
+      )}
+    >
+      <button
+        onClick={onClick}
+        type="button"
+        aria-label="Ask AI"
+        className="flex items-center w-full h-full rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
+      >
+        {/* Left zone: square orb area — orb fills the full container */}
+        <motion.div
+          style={{ width: containerSize, height: containerSize }}
+          className="shrink-0 flex items-center justify-center"
+        >
+          <SiriOrb size="auto" />
+        </motion.div>
+
+        {/* Right zone: label text, clipped when collapsed */}
+        <span className="text-xs font-medium text-foreground whitespace-nowrap pr-3">
+          Ask AI
+        </span>
+      </button>
+    </motion.div>
+  );
+}
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [showAILabel, setShowAILabel] = useState(false);
   const { open: openAIChat } = useAIChat();
+  const expandTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const collapseLabel = useCallback(() => {
     setShowAILabel(false);
     try {
-      localStorage.setItem(AI_LABEL_SEEN_KEY, "1");
+      sessionStorage.setItem(AI_LABEL_SEEN_KEY, "1");
     } catch {
-      // localStorage unavailable
+      // sessionStorage unavailable
     }
   }, []);
 
-  // Show label on first visit, auto-collapse after 4s
+  // Staged animation: orb only -> expand "Ask AI" -> linger -> collapse
   useEffect(() => {
     try {
-      if (!localStorage.getItem(AI_LABEL_SEEN_KEY)) {
-        setShowAILabel(true);
-        const timer = setTimeout(collapseLabel, 4000);
-        return () => clearTimeout(timer);
-      }
+      if (sessionStorage.getItem(AI_LABEL_SEEN_KEY)) return;
     } catch {
-      // localStorage unavailable — don't show label
+      return; // sessionStorage unavailable -- don't show label
     }
+
+    // Delay before expanding so the orb is visible alone first
+    const expandTimer = setTimeout(() => {
+      setShowAILabel(true);
+      // Linger with label visible, then collapse
+      const collapseTimer = setTimeout(collapseLabel, 3000);
+      // Store collapse timer ref for cleanup
+      expandTimerRef.current = collapseTimer;
+    }, 1500);
+
+    return () => {
+      clearTimeout(expandTimer);
+      if (expandTimerRef.current) clearTimeout(expandTimerRef.current);
+    };
   }, [collapseLabel]);
 
   useEffect(() => {
@@ -170,33 +268,11 @@ export default function Navbar() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
+                  <DockAIButton
+                    showLabel={showAILabel}
                     onClick={openAIChat}
-                    type="button"
-                    aria-label="Ask AI"
-                    className="relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl"
-                  >
-                    <DockItem className="rounded-3xl cursor-pointer bg-background text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors overflow-hidden">
-                      <div className="flex items-center justify-center h-full aspect-square shrink-0">
-                        <SiriOrb size="sm" />
-                      </div>
-                      <div
-                        className="grid transition-[grid-template-columns] duration-200 ease-out motion-reduce:transition-none"
-                        style={{
-                          gridTemplateColumns: showAILabel ? "1fr" : "0fr",
-                        }}
-                      >
-                        <span
-                          className={cn(
-                            "overflow-hidden whitespace-nowrap text-xs font-medium pr-3 transition-opacity duration-150 ease-out motion-reduce:transition-none",
-                            showAILabel ? "opacity-100" : "opacity-0"
-                          )}
-                        >
-                          Ask AI
-                        </span>
-                      </div>
-                    </DockItem>
-                  </button>
+                    className="bg-background text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors rounded-3xl"
+                  />
                 </TooltipTrigger>
                 <TooltipContent
                   side="bottom"

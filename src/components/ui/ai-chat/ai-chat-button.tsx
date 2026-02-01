@@ -12,7 +12,7 @@ export function AIChatButton() {
     return (
         <motion.button
             onClick={open}
-            className="group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2.5 rounded-full border border-chat-border bg-chat-bg px-6 py-3.5 text-base sm:text-[15px] font-medium text-chat-text shadow-lg transition-all hover:shadow-xl hover:border-chat-text-secondary/50"
+            className="group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2.5 rounded-full border border-chat-border bg-chat-bg px-5 py-2 text-base sm:text-[15px] font-medium text-chat-text shadow-lg transition-all hover:shadow-xl hover:border-chat-text-secondary/50"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

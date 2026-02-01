@@ -113,10 +113,10 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    // Colors matching the "Siri/MagicUI" aesthetic - enhanced vibrancy
-    const vec3 baseColor1 = vec3(0.7, 0.3, 1.0); // Brighter Purple
-    const vec3 baseColor2 = vec3(0.35, 0.8, 0.95); // Vibrant Cyan
-    const vec3 baseColor3 = vec3(0.1, 0.15, 0.75); // Richer Blue
+    // Teal palette — high contrast between highlight and base for visible depth
+    const vec3 baseColor1 = vec3(0.25, 1.0, 0.85); // Bright mint highlight
+    const vec3 baseColor2 = vec3(0.05, 0.45, 0.65); // Contrasting blue-teal
+    const vec3 baseColor3 = vec3(0.01, 0.06, 0.12); // Near-black base
     const float innerRadius = 0.0; // Fully solid filled orb from center
     const float noiseScale = 0.85; // Balanced movement
 
@@ -137,13 +137,13 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       float len = length(uv);
       float invLen = len > 0.0 ? 1.0 / len : 0.0;
 
-      // Smooth noise animation - gentle and flowing
-      float n0 = snoise3(vec3(uv * noiseScale, iTime * 0.4)) * 0.5 + 0.5;
+      // Noise animation — visible drift at idle
+      float n0 = snoise3(vec3(uv * noiseScale, iTime * 0.6)) * 0.5 + 0.5;
       float r0 = mix(mix(innerRadius, 1.0, 0.4), mix(innerRadius, 1.0, 0.6), n0);
       float d0 = distance(uv, (r0 * invLen) * uv);
       float v0 = light1(1.3, 9.0, d0); // Moderate intensity increase
       v0 *= smoothstep(r0 * 1.08, r0, len); // Soft edge
-      float cl = cos(ang + iTime * 2.0) * 0.5 + 0.5; // Smooth gradient rotation
+      float cl = cos(ang + iTime * 1.2) * 0.5 + 0.5; // Slow gradient rotation
 
       float a = iTime * -1.0;
       vec2 pos = vec2(cos(a), sin(a)) * r0;
@@ -179,9 +179,9 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
       // Extremely minimal warping - only active during thinking
       uv.x += hover * hoverIntensity * 0.02 * sin(uv.y * 6.0 + iTime * 0.5);
       uv.y += hover * hoverIntensity * 0.02 * sin(uv.x * 6.0 + iTime * 0.5);
-      // Barely perceptible background movement
-      uv.x += 0.003 * sin(uv.y * 3.0 - iTime * 0.4);
-      uv.y += 0.003 * cos(uv.x * 3.0 - iTime * 0.4);
+      // Idle surface warp — slow but visible organic drift
+      uv.x += 0.012 * sin(uv.y * 2.5 - iTime * 0.5);
+      uv.y += 0.012 * cos(uv.x * 2.5 - iTime * 0.5);
 
       vec4 col = draw(uv);
 
@@ -288,25 +288,23 @@ export const VoicePoweredOrb: FC<VoicePoweredOrbProps> = ({
         program.uniforms.iTime.value = t * 0.001;
         program.uniforms.hue.value = hue;
 
-        // Simulate activity based on phase
-        const targetActivity = phase === "thinking" ? 1.0 : 0.05; // Idle is very still
-        // Smooth transition between states
-        simulatedActivity += (targetActivity - simulatedActivity) * 0.05;
+        // Idle is visibly alive; thinking ramps up
+        const targetActivity = phase === "thinking" ? 1.0 : 0.25;
+        simulatedActivity += (targetActivity - simulatedActivity) * 0.04;
 
-        // Rotation speed increases noticeably with activity
-        const currentSpeed = rotateSpeed + (simulatedActivity * 1.5);
+        // Slow steady rotation — noticeable but not spinning
+        const currentSpeed = rotateSpeed + (simulatedActivity * 0.8);
         currentRot += dt * currentSpeed;
 
-        // Pulsing effect - much slower idle, faster when thinking
-        const pulseSpeed = 1.0 + (simulatedActivity * 2.5);
+        // Gentle breathing rhythm
+        const pulseSpeed = 0.8 + (simulatedActivity * 1.5);
         const pulseValue = Math.sin(t * 0.001 * pulseSpeed) * 0.5 + 0.5;
 
-        // Hover/Warp only active during thinking
         program.uniforms.hover.value = simulatedActivity;
         program.uniforms.hoverIntensity.value = hoverIntensity * (0.5 + simulatedActivity * 0.5);
         program.uniforms.rot.value = currentRot;
-        // Pulse is more pronounced when thinking
-        program.uniforms.pulse.value = pulseValue * (0.2 + simulatedActivity * 0.8);
+        // Visible idle pulse, stronger when thinking
+        program.uniforms.pulse.value = pulseValue * (0.35 + simulatedActivity * 0.65);
 
         if (rendererInstance && glContext) {
           glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);

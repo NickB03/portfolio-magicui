@@ -31,6 +31,14 @@ interface DockContextValue {
 
 const DockContext = createContext<DockContextValue | null>(null);
 
+const useDockContext = () => {
+  const context = useContext(DockContext);
+  if (!context) {
+    throw new Error("Dock components must be used within a Dock component");
+  }
+  return context;
+};
+
 const Dock = ({ className, children, magnification = DEFAULT_MAGNIFICATION, distance = DEFAULT_DISTANCE }: DockProps) => {
   const mouseX = useMotionValue(Infinity);
 
@@ -49,13 +57,7 @@ const Dock = ({ className, children, magnification = DEFAULT_MAGNIFICATION, dist
 
 const DockIcon = ({ className, children }: DockIconProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const context = useContext(DockContext);
-
-  if (!context) {
-    throw new Error("DockIcon must be used within a Dock component");
-  }
-
-  const { mouseX, magnification, distance } = context;
+  const { mouseX, magnification, distance } = useDockContext();
 
   const distanceCalc = useTransform(mouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
@@ -94,13 +96,7 @@ interface DockItemProps {
 
 const DockItem = ({ className, children }: DockItemProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const context = useContext(DockContext);
-
-  if (!context) {
-    throw new Error("DockItem must be used within a Dock component");
-  }
-
-  const { mouseX, magnification, distance } = context;
+  const { mouseX, magnification, distance } = useDockContext();
 
   const distanceCalc = useTransform(mouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
@@ -123,5 +119,5 @@ const DockItem = ({ className, children }: DockItemProps) => {
   );
 };
 
-export { Dock, DockIcon, DockItem };
+export { Dock, DockIcon, DockItem, useDockContext, BASE_SIZE, SPRING, DEFAULT_MAGNIFICATION, DEFAULT_DISTANCE };
 export type { DockProps, DockIconProps, DockItemProps };
