@@ -101,6 +101,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
         abortControllerRef.current = controller;
         // Connection timeout: covers embedding, vector search, and Gemini API setup
         const connectionTimeoutId = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT_MS);
+        let chunkTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
         try {
             const response = await fetch("/api/chat", {
@@ -163,7 +164,6 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             let accumulatedContent = "";
 
             // Per-chunk idle timeout: detects stalled streams
-            let chunkTimeoutId: ReturnType<typeof setTimeout> | undefined;
             const resetChunkTimeout = () => {
                 if (chunkTimeoutId) clearTimeout(chunkTimeoutId);
                 chunkTimeoutId = setTimeout(() => controller.abort(), STREAM_CHUNK_TIMEOUT_MS);
@@ -223,6 +223,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             );
         } finally {
             clearTimeout(connectionTimeoutId);
+            if (chunkTimeoutId) clearTimeout(chunkTimeoutId);
             abortControllerRef.current = null;
             setIsLoading(false);
         }
