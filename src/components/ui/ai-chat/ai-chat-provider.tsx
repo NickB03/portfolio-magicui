@@ -53,7 +53,8 @@ interface AIChatProviderProps {
     children: ReactNode;
 }
 
-const REQUEST_TIMEOUT_MS = 30_000;
+const CONNECTION_TIMEOUT_MS = 60_000; // Time allowed for initial connection (embedding + search + API call)
+const STREAM_CHUNK_TIMEOUT_MS = 15_000; // Max time between streamed chunks before considering it stalled
 
 export function AIChatProvider({ children }: AIChatProviderProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -98,7 +99,9 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
 
         const controller = new AbortController();
         abortControllerRef.current = controller;
-        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        // Connection timeout: covers embedding, vector search, and Gemini API setup
+        const connectionTimeoutId = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT_MS);
+        let chunkTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
         try {
             const response = await fetch("/api/chat", {
@@ -108,8 +111,10 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 signal: controller.signal,
             });
 
+            // Connection established — clear the connection timeout
+            clearTimeout(connectionTimeoutId);
+
             if (!response.ok) {
-                clearTimeout(timeoutId);
                 // Try to parse error response
                 const contentType = response.headers.get("content-type");
                 if (contentType?.includes("application/json")) {
@@ -158,9 +163,19 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             const decoder = new TextDecoder();
             let accumulatedContent = "";
 
+            // Per-chunk idle timeout: detects stalled streams
+            const resetChunkTimeout = () => {
+                if (chunkTimeoutId) clearTimeout(chunkTimeoutId);
+                chunkTimeoutId = setTimeout(() => controller.abort(), STREAM_CHUNK_TIMEOUT_MS);
+            };
+
+            resetChunkTimeout();
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+
+                resetChunkTimeout();
 
                 const chunk = decoder.decode(value, { stream: true });
                 accumulatedContent += chunk;
@@ -174,6 +189,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                     )
                 );
             }
+
+            if (chunkTimeoutId) clearTimeout(chunkTimeoutId);
 
             // Flush any remaining bytes from the decoder
             const remaining = decoder.decode();
@@ -205,7 +222,8 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
                 )
             );
         } finally {
-            clearTimeout(timeoutId);
+            clearTimeout(connectionTimeoutId);
+            if (chunkTimeoutId) clearTimeout(chunkTimeoutId);
             abortControllerRef.current = null;
             setIsLoading(false);
         }
