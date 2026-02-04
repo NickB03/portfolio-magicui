@@ -86,10 +86,55 @@ async function searchKnowledge(
     return data || [];
 }
 
+interface HistoryMessage {
+    role: "user" | "assistant";
+    content: string;
+}
+
+async function rewriteQuery(
+    message: string,
+    history: HistoryMessage[]
+): Promise<string> {
+    if (!history.length) return message;
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return message;
+
+    const prompt = `Given this conversation, rewrite the last user message as a standalone question that includes all necessary context. Return ONLY the rewritten question, nothing else.
+
+Conversation:
+${history.map((m) => `${m.role}: ${m.content}`).join("\n")}
+
+Last message to rewrite: ${message}`;
+
+    try {
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0, maxOutputTokens: 256 },
+                }),
+            }
+        );
+
+        if (!response.ok) return message;
+
+        const data = await response.json();
+        const rewritten = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        return rewritten || message;
+    } catch {
+        return message;
+    }
+}
+
 async function generateResponse(
     context: string,
     question: string,
-    modelName = "gemini-flash-lite-latest"
+    modelName = "gemini-flash-lite-latest",
+    history: HistoryMessage[] = []
 ): Promise<ReadableStream> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -106,6 +151,10 @@ async function generateResponse(
                     parts: [{ text: SYSTEM_PROMPT }],
                 },
                 contents: [
+                    ...history.map((m) => ({
+                        role: m.role === "assistant" ? "model" as const : "user" as const,
+                        parts: [{ text: m.content }],
+                    })),
                     {
                         role: "user",
                         parts: [
@@ -215,7 +264,7 @@ ${question}`,
 
 export async function POST(request: Request) {
     try {
-        const { message } = await request.json();
+        const { message, history: rawHistory } = await request.json();
 
         if (!message || typeof message !== "string") {
             return new Response(JSON.stringify({ error: "Message is required" }), {
@@ -223,6 +272,19 @@ export async function POST(request: Request) {
                 headers: { "Content-Type": "application/json" },
             });
         }
+
+        // Validate and cap history to last 10 messages
+        const history: HistoryMessage[] = Array.isArray(rawHistory)
+            ? rawHistory
+                  .filter(
+                      (m: unknown): m is HistoryMessage =>
+                          typeof m === "object" &&
+                          m !== null &&
+                          (((m as HistoryMessage).role === "user") || ((m as HistoryMessage).role === "assistant")) &&
+                          typeof (m as HistoryMessage).content === "string"
+                  )
+                  .slice(-10)
+            : [];
 
         // Initialize Supabase
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -236,8 +298,11 @@ export async function POST(request: Request) {
             });
         }
 
-        // Generate embedding for the question
-        const queryEmbedding = await generateEmbedding(message);
+        // Rewrite follow-up queries into standalone questions for better embedding
+        const searchQuery = await rewriteQuery(message, history);
+
+        // Generate embedding for the (potentially rewritten) question
+        const queryEmbedding = await generateEmbedding(searchQuery);
 
         // Search for relevant context
         const results = await searchKnowledge(supabaseUrl, supabaseKey, queryEmbedding);
@@ -257,14 +322,14 @@ export async function POST(request: Request) {
 
         try {
             // Try primary model first (latest stable lite model)
-            stream = await generateResponse(context, message, "gemini-flash-lite-latest");
+            stream = await generateResponse(context, message, "gemini-flash-lite-latest", history);
         } catch (primaryError: unknown) {
             // Check if it's a quota error
             if (primaryError instanceof Error && primaryError.message === "QUOTA_EXCEEDED") {
                 console.log("Quota exceeded on primary model, using fallback");
                 try {
                     // Try fallback model - full flash model may have different quota pool
-                    stream = await generateResponse(context, message, "gemini-flash-latest");
+                    stream = await generateResponse(context, message, "gemini-flash-latest", history);
                 } catch (fallbackError: unknown) {
 
                     // Check if fallback also hit quota

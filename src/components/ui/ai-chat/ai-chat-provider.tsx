@@ -80,6 +80,12 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
 
         lastUserMessageRef.current = content.trim();
 
+        // Build history from existing messages before adding the new one
+        const history = messages
+            .filter((m) => m.content && !m.isError)
+            .slice(-10)
+            .map((m) => ({ role: m.role, content: m.content }));
+
         const userMessage: Message = {
             id: `user-${Date.now()}`,
             role: "user",
@@ -104,7 +110,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: content }),
+                body: JSON.stringify({ message: content, history }),
                 signal: controller.signal,
             });
 
@@ -209,7 +215,7 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
             abortControllerRef.current = null;
             setIsLoading(false);
         }
-    }, [isLoading]);
+    }, [isLoading, messages]);
 
     const retryLastMessage = useCallback(() => {
         if (!lastUserMessageRef.current || isLoading) return;
