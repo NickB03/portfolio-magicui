@@ -34,13 +34,13 @@ export default function ProjectsSection() {
                 <div className="flex flex-wrap gap-3 justify-center max-w-[800px] mx-auto">
                     {DATA.projects.map((project, id) => (
                         <BlurFade
-                            key={project.title}
+                            key={`${project.title}-${id}`}
                             delay={BLUR_FADE_DELAY * 12 + id * 0.05}
                             className="w-full sm:w-[calc(50%-6px)]"
                         >
                             <ProjectCard
                                 href={project.href}
-                                key={project.title}
+                                key={`${project.title}-${id}`}
                                 title={project.title}
                                 description={project.description}
                                 dates={project.dates}

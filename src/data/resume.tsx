@@ -128,6 +128,26 @@ export const DATA = {
       video: "",
       imageClassName: "h-auto w-full object-cover",
     },
+    {
+      title: "AnalystAI",
+      href: "https://analystai.nickb.net",
+      dates: "",
+      active: true,
+      description:
+        "AI document research app — upload PDFs, extract & chunk content, and chat with a grounded AI analyst powered by RAG.",
+      technologies: [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Vercel AI SDK",
+        "OpenRouter",
+        "pgvector",
+      ],
+      links: [],
+      image: "/analyst-ai-preview.png",
+      video: "",
+      imageClassName: "h-auto w-full object-cover",
+    },
     /*
     {
       title: "AnalystAI",
