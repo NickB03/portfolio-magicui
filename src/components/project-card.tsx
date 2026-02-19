@@ -64,7 +64,7 @@ export function ProjectCard({
         className
       )}
     >
-      <div className="relative shrink-0">
+      <div className={cn("relative shrink-0", imageClassName)}>
         {href ? (
           <Link
             href={href}

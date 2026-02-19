@@ -131,31 +131,41 @@ export const DATA = {
     {
       title: "AnalystAI",
       href: "https://analystai.nickb.net",
-      dates: "Active",
+      dates: "",
       active: true,
       description:
-        "Full-stack AI document research app for grounded analysis. Upload PDFs, extract content, and chat with an AI analyst using semantic retrieval.",
+        "AI document research app — upload PDFs, extract & chunk content, and chat with a grounded AI analyst powered by RAG.",
       technologies: [
         "Next.js",
         "React",
         "TypeScript",
         "Vercel AI SDK",
         "OpenRouter",
-        "Supabase",
-        "PostgreSQL",
         "pgvector",
       ],
-      links: [
-        {
-          type: "Website",
-          href: "https://analystai.nickb.net",
-          icon: <Icons.globe className="size-3" />,
-        },
-      ],
-      image: "/analystai_preview.png",
+      links: [],
+      image: "/analyst-ai-preview.png",
       video: "",
+      imageClassName: "h-auto w-full object-cover",
     },
     /*
+    {
+      title: "AnalystAI",
+      href: "",
+      dates: "",
+      active: true,
+      description:
+        "Document analysis app with PDF extraction, OCR, AI summarization (Gemini API). Containerized with Docker, deployed to Google Cloud Run.",
+      technologies: [
+        "Docker",
+        "Google Cloud Run",
+        "Gemini API",
+        "OCR",
+      ],
+      links: [],
+      image: "/analystai-preview.jpg",
+      video: "",
+    },
     {
       title: "ChatPDF-style Q&A tool",
       href: "",
